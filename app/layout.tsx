@@ -18,6 +18,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
+import { Footer } from "@/components/layout/footer";
 
 // Configuração da fonte Inter do Google Fonts
 const inter = Inter({
@@ -55,7 +56,12 @@ export default function RootLayout({
           Providers: Componente que agrupa todos os context providers
           da aplicação (tema, autenticação, estado global, etc)
         */}
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="min-h-screen flex flex-col">
+            {children}
+            <Footer />
+          </div>
+        </Providers>
       </body>
     </html>
   );
