@@ -27,7 +27,7 @@ export function Header() {
         <nav className="hidden md:flex items-center space-x-8">
           <Link
             href="/"
-            className="text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200 relative py-2"
+            className="text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200 relative py-2 group"
           >
             Início
             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
