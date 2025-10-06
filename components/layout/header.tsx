@@ -1,74 +1,89 @@
-"use client"; // Usa hooks de estado (tema) e interatividade
-
-/**
- * HEADER - Componente de navegação principal
- *
- * Funcionalidades:
- * - Logo e marca
- * - Menu de navegação
- * - Botão de tema claro/escuro
- * - Botões de autenticação
- * - Responsivo (mobile/desktop)
- */
+"use client";
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "./theme-toggle";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export function Header() {
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      {/*
-        Estilos especiais:
-        - backdrop-blur: Efeito de vidro fosco
-        - supports-[backdrop-filter]: Fallback para navegadores antigos
-        - bg-background/95: Fundo levemente transparente
-      */}
-
-      <div className="container flex h-16 items-center justify-between">
-        {/* LOGO - Link para página inicial */}
-        <Link href="/" className="flex items-center space-x-2">
-          <div className="h-8 w-8 bg-blue-600 rounded-lg" />
-          <span className="font-bold text-xl">CodeCraft</span>
+    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+      <div className="container-custom flex h-16 items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center space-x-3 group">
+          <div className="h-10 w-10 gradient-bg rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
+            <span className="text-white font-bold text-lg">C</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="font-bold text-xl gradient-text leading-5">
+              CodeCraft
+            </span>
+            <span className="text-xs text-muted-foreground leading-3">
+              Academy
+            </span>
+          </div>
         </Link>
 
-        {/* NAVEGAÇÃO - Links principais (oculto em mobile) */}
-        <nav className="hidden md:flex items-center space-x-6">
+        {/* Navegação */}
+        <nav className="hidden md:flex items-center space-x-8">
           <Link
             href="/"
-            className="text-sm font-medium hover:text-blue-600 transition-colors"
+            className="text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200 relative py-2"
           >
             Início
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
           </Link>
           <Link
             href="/courses"
-            className="text-sm font-medium hover:text-blue-600 transition-colors"
+            className="text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200 relative py-2 group"
           >
             Cursos
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
           </Link>
           <Link
             href="/blog"
-            className="text-sm font-medium hover:text-blue-600 transition-colors"
+            className="text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200 relative py-2 group"
           >
             Blog
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
           </Link>
           <Link
             href="/about"
-            className="text-sm font-medium hover:text-blue-600 transition-colors"
+            className="text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200 relative py-2 group"
           >
             Sobre
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
           </Link>
         </nav>
 
-        {/* AÇÕES - Tema e autenticação */}
-        <div className="flex items-center space-x-4">
+        {/* Ações */}
+        <div className="flex items-center space-x-3">
           <ThemeToggle />
-          <Button variant="outline" size="sm">
-            Entrar
-          </Button>
-          <Button size="sm">Cadastrar</Button>
+          <div className="hidden sm:flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="btn btn-secondary btn-sm"
+            >
+              Entrar
+            </Button>
+            <Button size="sm" className="btn btn-primary btn-sm">
+              Cadastrar
+            </Button>
+          </div>
+
+          {/* Menu Mobile (placeholder) */}
+          <button className="md:hidden p-2 rounded-md hover:bg-muted transition-colors">
+            <div className="w-5 h-5 flex flex-col justify-between">
+              <span className="w-full h-0.5 bg-foreground rounded"></span>
+              <span className="w-full h-0.5 bg-foreground rounded"></span>
+              <span className="w-full h-0.5 bg-foreground rounded"></span>
+            </div>
+          </button>
         </div>
       </div>
+
+      {/* Border gradient decorativo */}
+      <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
     </header>
   );
 }
