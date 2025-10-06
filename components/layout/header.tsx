@@ -1,14 +1,63 @@
-"use client";
+/**
+ * HEADER COM AUTENTICAÇÃO - CodeCraft Academy
+ *
+ * Header responsivo que mostra estado de autenticação do usuário
+ * Atualiza automaticamente quando usuário faz login/logout
+ */
 
+"use client"; // Necessário para hooks e efeitos
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { supabase } from "@/lib/supabase/client";
+import { User } from "@supabase/supabase-js";
 
 export function Header() {
+  // Estado para armazenar usuário logado
+  const [user, setUser] = useState<User | null>(null);
+
+  /**
+   * EFFECT PARA GERENCIAR AUTENTICAÇÃO
+   * Executa quando componente é montado
+   */
+  useEffect(() => {
+    // 1. Verifica se já existe uma sessão ativa
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+    };
+
+    checkSession();
+
+    // 2. Configura listener para mudanças de autenticação
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      // Atualiza estado quando usuário faz login/logout
+      setUser(session?.user ?? null);
+    });
+
+    // 3. Cleanup: remove listener quando componente desmonta
+    return () => subscription.unsubscribe();
+  }, []); // Array vazio = executa apenas uma vez
+
+  /**
+   * FUNÇÃO DE LOGOUT
+   * Desconta usuário e atualiza estado
+   */
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    // O listener onAuthStateChange vai atualizar automaticamente
+  };
+
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
       <div className="container-custom flex h-16 items-center justify-between">
-        {/* Logo */}
+        {/* LOGO - Sempre visível */}
         <Link href="/" className="flex items-center space-x-3 group">
           <div className="h-10 w-10 gradient-bg rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
             <span className="text-white font-bold text-lg">C</span>
@@ -23,7 +72,7 @@ export function Header() {
           </div>
         </Link>
 
-        {/* Navegação */}
+        {/* NAVEGAÇÃO PRINCIPAL - Oculto em mobile */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link
             href="/"
@@ -55,23 +104,49 @@ export function Header() {
           </Link>
         </nav>
 
-        {/* Ações */}
+        {/* ÁREA DE AÇÕES DO USUÁRIO */}
         <div className="flex items-center space-x-3">
+          {/* Toggle de tema - sempre visível */}
           <ThemeToggle />
-          <div className="hidden sm:flex items-center space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="btn btn-secondary btn-sm"
-            >
-              Entrar
-            </Button>
-            <Button size="sm" className="btn btn-primary btn-sm">
-              Cadastrar
-            </Button>
-          </div>
 
-          {/* Menu Mobile (placeholder) */}
+          {/* CONDICIONAL: Mostra estado baseado no login */}
+          {user ? (
+            // USUÁRIO LOGADO: Mostra email e botão sair
+            <div className="flex items-center space-x-2">
+              <span className="text-sm text-muted-foreground">
+                Olá, {user.email?.split("@")[0]}{" "}
+                {/* Mostra apenas nome do email */}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                className="btn btn-secondary"
+                onClick={handleLogout}
+              >
+                Sair
+              </Button>
+            </div>
+          ) : (
+            // USUÁRIO NÃO LOGADO: Mostra botões de login/cadastro
+            <div className="hidden sm:flex items-center space-x-2">
+              <Link href="/login">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="btn btn-secondary"
+                >
+                  Entrar
+                </Button>
+              </Link>
+              <Link href="/register">
+                <Button size="sm" className="btn btn-primary">
+                  Cadastrar
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          {/* MENU MOBILE - Placeholder para futuro menu hamburger */}
           <button className="md:hidden p-2 rounded-md hover:bg-muted transition-colors">
             <div className="w-5 h-5 flex flex-col justify-between">
               <span className="w-full h-0.5 bg-foreground rounded"></span>
@@ -82,7 +157,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* Border gradient decorativo */}
+      {/* BORDER GRADIENT DECORATIVA */}
       <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
     </header>
   );
