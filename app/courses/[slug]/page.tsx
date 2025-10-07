@@ -17,7 +17,6 @@ import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/header";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
-import Link from "next/link";
 
 interface CoursePageProps {
   params: {
