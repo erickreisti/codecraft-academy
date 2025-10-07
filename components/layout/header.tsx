@@ -1,5 +1,5 @@
 /**
- * HEADER COM AUTENTICAÇÃO - CodeCraft Academy
+ * HEADER COM AUTENTICAÇÃO E CARRINHO - CodeCraft Academy
  *
  * Header responsivo que mostra estado de autenticação do usuário
  * Atualiza automaticamente quando usuário faz login/logout
@@ -10,13 +10,20 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { CartSidebar } from "@/components/cart/cart-sidebar";
+import { useCartStore } from "@/lib/stores/cart-store";
 import { supabase } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { ShoppingCart } from "lucide-react";
 
 export function Header() {
   // Estado para armazenar usuário logado
   const [user, setUser] = useState<User | null>(null);
+
+  // Store do carrinho
+  const { getItemCount, setIsOpen } = useCartStore();
 
   /**
    * EFFECT PARA GERENCIAR AUTENTICAÇÃO
@@ -109,13 +116,30 @@ export function Header() {
           {/* Toggle de tema - sempre visível */}
           <ThemeToggle />
 
+          {/* Botão do Carrinho - sempre visível */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="relative"
+            onClick={() => setIsOpen(true)}
+          >
+            <ShoppingCart className="h-4 w-4" />
+            {getItemCount() > 0 && (
+              <Badge
+                variant="secondary"
+                className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+              >
+                {getItemCount()}
+              </Badge>
+            )}
+          </Button>
+
           {/* CONDICIONAL: Mostra estado baseado no login */}
           {user ? (
             // USUÁRIO LOGADO: Mostra email e botão sair
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-muted-foreground">
-                Olá, {user.email?.split("@")[0]}{" "}
-                {/* Mostra apenas nome do email */}
+              <span className="text-sm text-muted-foreground hidden sm:inline">
+                Olá, {user.email?.split("@")[0]}
               </span>
               <Button
                 variant="outline"
@@ -159,6 +183,9 @@ export function Header() {
 
       {/* BORDER GRADIENT DECORATIVA */}
       <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+
+      {/* Sidebar do Carrinho */}
+      <CartSidebar />
     </header>
   );
 }
