@@ -1,20 +1,12 @@
-// middleware.ts - VERSÃO FINAL CORRIGIDA
-import { NextResponse, type NextRequest } from "next/server";
+// middleware.ts - DESABILITADO TEMPORARIAMENTE
+import { NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  const response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-
-  if (request.nextUrl.pathname.startsWith("/dashboard")) {
-    return response;
-  }
-
-  return response;
+export async function middleware() {
+  // Middleware desabilitado - todas as rotas são permitidas
+  // A verificação será feita nas páginas individuais
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: [],
 };

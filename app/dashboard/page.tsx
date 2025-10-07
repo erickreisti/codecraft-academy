@@ -1,4 +1,3 @@
-// app/dashboard/page.tsx - VERSÃO CORRIGIDA
 "use client";
 
 import { useState, useEffect } from "react";
@@ -54,7 +53,6 @@ export default function DashboardPage() {
         if (currentSession) {
           // 🎯 BUSCAR DADOS DO USUÁRIO
           await fetchUserData(currentSession.user.id);
-        } else {
         }
       } catch (error) {
         console.error("💥 Erro ao verificar sessão:", error);
@@ -187,6 +185,16 @@ export default function DashboardPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              {/* ✅ BOTÃO DO PERFIL ADICIONADO AQUI */}
+              <Button asChild variant="outline" className="btn btn-secondary">
+                <Link
+                  href="/dashboard/profile"
+                  className="flex items-center gap-2"
+                >
+                  👤 Perfil
+                </Link>
+              </Button>
+
               <Button asChild className="btn btn-primary">
                 <Link href="/courses">🚀 Explorar Cursos</Link>
               </Button>
