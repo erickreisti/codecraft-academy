@@ -11,7 +11,7 @@
  * - Navegação principal
  * - Toggle de tema claro/escuro
  * - Ícone do carrinho com contador
- * - Estado de autenticação do usuário (exibe nome completo)
+ * - Estado de autenticação do usuário (exibe nome completo e link para dashboard)
  * - Sidebar do carrinho
  */
 
@@ -26,7 +26,7 @@ import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { supabase } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, User as UserIcon } from "lucide-react"; // Importando ícone opcional
 
 // Interface simplificada para o perfil do usuário (apenas o necessário)
 interface UserProfile {
@@ -224,11 +224,24 @@ export function Header() {
 
           {/* CONDICIONAL: Mostra estado baseado no login */}
           {user ? (
-            // USUÁRIO LOGADO: Mostra nome completo (ou parte do email) e botão sair
+            // USUÁRIO LOGADO: Mostra nome completo (ou parte do email), link para dashboard e botão sair
             <div className="flex items-center space-x-2">
+              {/* Link para o Dashboard */}
+              <Link href="/dashboard" className="hidden sm:inline">
+                <Button
+                  variant="ghost" // Usando variant ghost para um estilo mais leve
+                  size="sm"
+                  className="flex items-center gap-1 px-2 py-1 text-sm" // Ajuste de padding e texto
+                >
+                  <UserIcon className="h-4 w-4" /> {/* Ícone opcional */}
+                  Dashboard
+                </Button>
+              </Link>
+              {/* Nome do Usuário */}
               <span className="text-sm text-muted-foreground hidden sm:inline">
                 Olá, {displayName}
               </span>
+              {/* Botão Sair */}
               <Button
                 variant="outline"
                 size="sm"
