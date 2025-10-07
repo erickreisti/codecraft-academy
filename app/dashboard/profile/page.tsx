@@ -1,6 +1,8 @@
-// app/dashboard/profile/page.tsx - VERSÃO FINAL CORRIGIDA
-import { createServerClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+// app/dashboard/profile/page.tsx - VERSÃO COM TIPAGEM CORRIGIDA
+"use client";
+
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,36 +14,107 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase/client";
+import { toast } from "sonner";
 import { updateProfile } from "@/app/actions/profile-actions";
+import { Session } from "@supabase/supabase-js";
 
-// ✅ INTERFACE CORRETA para searchParams
-interface ProfilePageProps {
-  searchParams: { [key: string]: string | string[] | undefined };
+// ✅ INTERFACES DE TIPAGEM
+interface UserProfile {
+  id: string;
+  full_name?: string;
+  bio?: string;
+  website?: string;
+  created_at: string;
+  updated_at: string;
 }
 
-export default async function ProfilePage({ searchParams }: ProfilePageProps) {
-  const supabase = createServerClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+export default function ProfilePage() {
+  const router = useRouter();
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [success, setSuccess] = useState(false);
 
-  if (!session) redirect("/login");
+  // 🔍 BUSCAR SESSÃO E DADOS DO USUÁRIO
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", session.user.id)
-    .single();
+        // Verificar sessão
+        const {
+          data: { session: currentSession },
+        } = await supabase.auth.getSession();
 
-  // ✅ CALCULAR TEMPO COMO MEMBRO (agora usado no JSX)
-  const memberSince = new Date(session.user.created_at);
+        if (!currentSession) {
+          console.log(
+            "❌ Nenhuma sessão encontrada - redirecionando para login"
+          );
+          router.push("/login");
+          return;
+        }
+
+        setSession(currentSession);
+
+        // Buscar perfil
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", currentSession.user.id)
+          .single();
+
+        setProfile(profileData);
+      } catch (error) {
+        console.error("💥 Erro ao buscar dados:", error);
+        toast.error("Erro ao carregar perfil");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [router]);
+
+  // Verificar success da URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("success") === "true") {
+      setSuccess(true);
+      // Limpar após 5 segundos
+      setTimeout(() => setSuccess(false), 5000);
+    }
+  }, []);
+
+  // Calcular tempo como membro
+  const memberSince = session ? new Date(session.user.created_at) : new Date();
   const now = new Date();
   const monthsAsMember = Math.floor(
     (now.getTime() - memberSince.getTime()) / (1000 * 60 * 60 * 24 * 30)
   );
 
-  // ✅ VERIFICAR searchParams corretamente
-  const success = searchParams.success === "true";
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-6xl animate-spin">🔄</div>
+          <h2 className="text-xl font-bold">Carregando perfil...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="text-6xl">🔐</div>
+          <h2 className="text-xl font-bold">Não autorizado</h2>
+          <p>Redirecionando para login...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,7 +150,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* ✅ MENSAGEM DE SUCESSO CORRIGIDA */}
+                {/* MENSAGEM DE SUCESSO */}
                 {success && (
                   <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-3">
                     <span className="text-xl">✅</span>
@@ -192,7 +265,6 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
                   <p className="text-sm font-medium">📅 Membro desde</p>
                   <p className="text-sm text-muted-foreground mt-1">
                     {memberSince.toLocaleDateString("pt-BR")}
-                    {/* ✅ AGORA USANDO A VARIÁVEL monthsAsMember */}
                     <span className="block text-xs text-green-600 mt-1">
                       ✅ {monthsAsMember}{" "}
                       {monthsAsMember === 1 ? "mês" : "meses"} na plataforma
