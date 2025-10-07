@@ -11,7 +11,7 @@
  * - Navegação principal
  * - Toggle de tema claro/escuro
  * - Ícone do carrinho com contador
- * - Estado de autenticação do usuário
+ * - Estado de autenticação do usuário (exibe nome completo)
  * - Sidebar do carrinho
  */
 
@@ -28,48 +28,109 @@ import { supabase } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
 import { ShoppingCart } from "lucide-react";
 
+// Interface simplificada para o perfil do usuário (apenas o necessário)
+interface UserProfile {
+  full_name?: string;
+}
+
 export function Header() {
   // Estado para armazenar usuário logado
   const [user, setUser] = useState<User | null>(null);
+  // Estado para armazenar o nome completo do usuário
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // Store do carrinho
   const { getItemCount, setIsOpen } = useCartStore();
 
   /**
-   * EFFECT PARA GERENCIAR AUTENTICAÇÃO
+   * EFFECT PARA GERENCIAR AUTENTICAÇÃO E PERFIL
    * Executa quando componente é montado
    */
   useEffect(() => {
-    // 1. Verifica se já existe uma sessão ativa
-    const checkSession = async () => {
+    let isSubscribed = true; // Flag para evitar setState após desmontagem
+
+    // 1. Verifica se já existe uma sessão ativa e busca o perfil
+    const checkSessionAndProfile = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
+
+      if (session?.user && isSubscribed) {
+        setUser(session.user);
+
+        // Buscar o perfil do usuário no banco de dados
+        const { data: profileData, error } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", session.user.id)
+          .single();
+
+        if (error) {
+          console.error("Erro ao buscar perfil:", error);
+          // Se houver erro, pode ser que o perfil ainda não exista, então definimos como null
+          setUserProfile(null);
+        } else {
+          setUserProfile(profileData);
+        }
+      } else {
+        setUser(null);
+        setUserProfile(null);
+      }
     };
 
-    checkSession();
+    checkSessionAndProfile();
 
     // 2. Configura listener para mudanças de autenticação
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Atualiza estado quando usuário faz login/logout
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        // Atualiza estado do usuário
+        if (isSubscribed) {
+          setUser(session.user);
+
+          // Busca o perfil do usuário logado
+          const { data: profileData, error } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", session.user.id)
+            .single();
+
+          if (error) {
+            console.error("Erro ao buscar perfil no evento de auth:", error);
+            setUserProfile(null);
+          } else {
+            setUserProfile(profileData);
+          }
+        }
+      } else {
+        // Usuário deslogado
+        if (isSubscribed) {
+          setUser(null);
+          setUserProfile(null);
+        }
+      }
     });
 
-    // 3. Cleanup: remove listener quando componente desmonta
-    return () => subscription.unsubscribe();
+    // 3. Cleanup: remove listener e flag quando componente desmonta
+    return () => {
+      isSubscribed = false;
+      subscription.unsubscribe();
+    };
   }, []); // Array vazio = executa apenas uma vez
 
   /**
    * FUNÇÃO DE LOGOUT
-   * Desconta usuário e atualiza estado
+   * Desloga usuário e atualiza estado
    */
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // O listener onAuthStateChange vai atualizar automaticamente
+    // O listener onAuthStateChange vai atualizar automaticamente os estados setUser e setUserProfile
   };
+
+  // Nome a ser exibido
+  const displayName =
+    userProfile?.full_name || user?.email?.split("@")[0] || "Aluno";
 
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
@@ -163,10 +224,10 @@ export function Header() {
 
           {/* CONDICIONAL: Mostra estado baseado no login */}
           {user ? (
-            // USUÁRIO LOGADO: Mostra email e botão sair
+            // USUÁRIO LOGADO: Mostra nome completo (ou parte do email) e botão sair
             <div className="flex items-center space-x-2">
               <span className="text-sm text-muted-foreground hidden sm:inline">
-                Olá, {user.email?.split("@")[0]}
+                Olá, {displayName}
               </span>
               <Button
                 variant="outline"
