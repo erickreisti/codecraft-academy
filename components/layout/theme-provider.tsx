@@ -1,11 +1,7 @@
 // components/layout/theme-provider.tsx
 
-"use client"; // Indica que este componente roda no lado do cliente
-
-import { ThemeProvider as NextThemesProvider } from "next-themes";
-
 /**
- * Provedor de Tema - Gerenciamento de modo claro/escuro
+ * PROVEDOR DE TEMA - Gerenciamento de modo claro/escuro
  *
  * Este componente envolve a aplicação com o provedor de temas
  * do next-themes, permitindo alternar entre temas claro, escuro
@@ -17,6 +13,10 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
  * - enableSystem: Respeita a preferência do sistema operacional
  * - disableTransitionOnChange: Remove animação ao mudar temas (evita flash)
  */
+
+"use client"; // Indica que este componente roda no lado do cliente
+
+import { ThemeProvider as NextThemesProvider } from "next-themes";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   return (

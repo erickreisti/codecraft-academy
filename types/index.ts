@@ -159,6 +159,30 @@ export interface Notification {
   created_at: string;
 }
 
+// ===== TIPOS PARA CARRINHO =====
+export interface CartItem {
+  id: string;
+  title: string;
+  price: number;
+  image_url?: string;
+  slug: string;
+  quantity: number;
+}
+
+export interface OrderWithItems extends Order {
+  order_items: (OrderItem & {
+    courses: Pick<Course, "title" | "slug">;
+  })[];
+}
+
+export interface CartCheckoutData {
+  items: CartItem[];
+  subtotal: number;
+  discount: number;
+  total: number;
+  coupon?: string;
+}
+
 // ===== TIPOS DE SUPABASE =====
 export interface Database {
   public: {

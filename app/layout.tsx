@@ -19,6 +19,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Footer } from "@/components/layout/footer";
+import { Toaster } from "@/components/ui/sonner";
 
 // Configuração da fonte Inter do Google Fonts
 const inter = Inter({
@@ -46,10 +47,22 @@ export default function RootLayout({
   return (
     <html lang="pt-BR" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={inter.className}>
+        {/* PROVIDERS: Contextos de Tema, Autenticação, etc */}
         <Providers>
           <div className="min-h-screen flex flex-col">
+            {/* CONTEÚDO DINÂMICO DAS PÁGINAS */}
             {children}
+
+            {/* FOOTER FIXO EM TODAS AS PÁGINAS */}
             <Footer />
+
+            {/* TOASTER: Sistema de Notificações */}
+            <Toaster
+              position="top-right"
+              duration={3000}
+              closeButton
+              richColors
+            />
           </div>
         </Providers>
       </body>

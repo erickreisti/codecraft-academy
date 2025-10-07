@@ -1,3 +1,16 @@
+// components/layout/footer.tsx
+
+/**
+ * FOOTER - Rodapé da aplicação
+ *
+ * Componente de rodapé com:
+ * - Logo e descrição da marca
+ * - Links organizados por categorias
+ * - Links de redes sociais
+ * - Copyright e informações legais
+ * - Design responsivo
+ */
+
 "use client";
 
 import Link from "next/link";
@@ -9,9 +22,9 @@ export function Footer() {
   return (
     <footer className="border-t bg-background/95 backdrop-blur">
       <div className="container-custom">
-        {/* Main Footer */}
+        {/* Main Footer - Grid com 4 colunas em desktop */}
         <div className="section-py grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
+          {/* Brand - Coluna da marca */}
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center space-x-3 mb-4">
               <div className="h-10 w-10 gradient-bg rounded-xl flex items-center justify-center">
@@ -44,7 +57,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Cursos */}
+          {/* Cursos - Links para categorias de cursos */}
           <div>
             <h3 className="font-semibold mb-4">Cursos</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
@@ -83,7 +96,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Empresa */}
+          {/* Empresa - Links institucionais */}
           <div>
             <h3 className="font-semibold mb-4">Empresa</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
@@ -122,7 +135,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Suporte */}
+          {/* Suporte - Links de ajuda e legal */}
           <div>
             <h3 className="font-semibold mb-4">Suporte</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
@@ -162,7 +175,7 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Bottom Footer */}
+        {/* Bottom Footer - Copyright e informações legais */}
         <div className="border-t py-6 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground mb-4 md:mb-0">
             © {currentYear} CodeCraft Academy. Todos os direitos reservados.

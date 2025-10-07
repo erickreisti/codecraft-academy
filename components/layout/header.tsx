@@ -1,8 +1,18 @@
+// components/layout/header.tsx
+
 /**
  * HEADER COM AUTENTICAÇÃO E CARRINHO - CodeCraft Academy
  *
  * Header responsivo que mostra estado de autenticação do usuário
  * Atualiza automaticamente quando usuário faz login/logout
+ *
+ * Funcionalidades:
+ * - Logo com link para home
+ * - Navegação principal
+ * - Toggle de tema claro/escuro
+ * - Ícone do carrinho com contador
+ * - Estado de autenticação do usuário
+ * - Sidebar do carrinho
  */
 
 "use client"; // Necessário para hooks e efeitos
@@ -122,15 +132,32 @@ export function Header() {
             size="icon"
             className="relative"
             onClick={() => setIsOpen(true)}
+            asChild={getItemCount() > 0}
           >
-            <ShoppingCart className="h-4 w-4" />
-            {getItemCount() > 0 && (
-              <Badge
-                variant="secondary"
-                className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-              >
-                {getItemCount()}
-              </Badge>
+            {getItemCount() > 0 ? (
+              <Link href="/checkout">
+                <ShoppingCart className="h-4 w-4" />
+                {getItemCount() > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                  >
+                    {getItemCount()}
+                  </Badge>
+                )}
+              </Link>
+            ) : (
+              <>
+                <ShoppingCart className="h-4 w-4" />
+                {getItemCount() > 0 && (
+                  <Badge
+                    variant="secondary"
+                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                  >
+                    {getItemCount()}
+                  </Badge>
+                )}
+              </>
             )}
           </Button>
 

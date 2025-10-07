@@ -3,21 +3,12 @@
 /**
  * STORE DO CARRINHO - Gerenciamento de estado global
  *
- * CORREÇÃO: Exportando o tipo CartItem para uso em outros componentes
+ * CORREÇÃO: Adicionados os estados e métodos que o CartNotification precisa
  */
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-// CORREÇÃO: Exportando a interface CartItem
-export interface CartItem {
-  id: string;
-  title: string;
-  price: number;
-  image_url?: string;
-  slug: string;
-  quantity: number;
-}
+import { CartItem } from "@/types";
 
 interface CartStore {
   items: CartItem[];
@@ -41,7 +32,7 @@ interface CartStore {
   isInCart: (id: string) => boolean;
   getSubtotal: () => number;
 
-  // MÉTODO PARA NOTIFICAÇÕES
+  // NOVO MÉTODO PARA NOTIFICAÇÕES
   hideNotification: () => void;
 }
 
@@ -50,6 +41,8 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       isOpen: false,
+
+      // INICIALIZA OS NOVOS ESTADOS
       lastAddedItem: null,
       showNotification: false,
 
@@ -71,6 +64,7 @@ export const useCartStore = create<CartStore>()(
 
         const addedItem = newItems.find((item) => item.id === course.id);
 
+        // ATUALIZA COM OS NOVOS ESTADOS DE NOTIFICAÇÃO
         set({
           items: newItems,
           lastAddedItem: addedItem || null,
@@ -78,6 +72,7 @@ export const useCartStore = create<CartStore>()(
           isOpen: true,
         });
 
+        // Auto-esconde a notificação após 3 segundos
         setTimeout(() => {
           get().hideNotification();
         }, 3000);
@@ -137,12 +132,14 @@ export const useCartStore = create<CartStore>()(
 
       setIsOpen: (isOpen) => set({ isOpen }),
 
+      // NOVO MÉTODO: ESCONDE NOTIFICAÇÃO
       hideNotification: () => set({ showNotification: false }),
     }),
     {
       name: "codecraft-cart-storage",
       partialize: (state) => ({
         items: state.items,
+        // Não persistir estados temporários de notificação
       }),
     }
   )
