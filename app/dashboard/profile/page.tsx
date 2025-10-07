@@ -34,6 +34,7 @@ export default function ProfilePage() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
 
   // 🔍 BUSCAR SESSÃO E DADOS DO USUÁRIO
@@ -104,6 +105,45 @@ export default function ProfilePage() {
     );
   }
 
+  // ✅ NOVA FUNÇÃO PARA SALVAR
+  const handleSaveProfile = async (formData: FormData) => {
+    if (!session) return;
+
+    setSaving(true);
+
+    try {
+      const result = await updateProfile(session.user.id, formData);
+
+      if (result.success) {
+        setSuccess(true);
+        toast.success("Perfil atualizado!", {
+          description: "Suas alterações foram salvas com sucesso.",
+        });
+
+        // Atualizar dados locais
+        const { data: updatedProfile } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+
+        setProfile(updatedProfile);
+
+        // Esconder mensagem após 3 segundos
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        toast.error("Erro ao salvar", {
+          description: result.error,
+        });
+      }
+    } catch (error) {
+      toast.error("Erro inesperado");
+      console.error("Erro ao salvar perfil:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!session) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -163,12 +203,7 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                <form
-                  action={(formData) =>
-                    updateProfile(session.user.id, formData)
-                  }
-                  className="space-y-6"
-                >
+                <form action={handleSaveProfile} className="space-y-6">
                   {/* Email (somente leitura) */}
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center gap-2">
@@ -242,8 +277,19 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  <Button type="submit" className="btn btn-primary w-full">
-                    💾 Salvar Alterações
+                  <Button
+                    type="submit"
+                    className="btn btn-primary w-full"
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Salvando...
+                      </div>
+                    ) : (
+                      "💾 Salvar Alterações"
+                    )}
                   </Button>
                 </form>
               </CardContent>

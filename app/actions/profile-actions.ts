@@ -1,9 +1,8 @@
-// app/actions/profile-actions.ts - VERSÃO CORRIGIDA
+// app/actions/profile-actions.ts - VERSÃO SEM REDIRECT
 "use server";
 
 import { createServerClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { z } from "zod";
 
 const profileSchema = z.object({
@@ -15,41 +14,45 @@ const profileSchema = z.object({
   website: z.string().url("URL deve ser válida").optional().or(z.literal("")),
 });
 
-// ✅ MUDANÇA: Receber userId explicitamente
+// ✅ RETORNA resultado em vez de redirecionar
 export async function updateProfile(userId: string, formData: FormData) {
   const supabase = createServerClient();
 
   try {
-    // 📋 Validar dados do formulário
+    // 📋 Validar dados
     const validatedData = profileSchema.parse({
       full_name: formData.get("full_name"),
       bio: formData.get("bio"),
       website: formData.get("website"),
     });
 
-    // 💾 Atualizar perfil no Supabase
+    // 💾 Atualizar perfil
     const { error } = await supabase.from("profiles").upsert({
-      id: userId, // ✅ Usar userId passado como parâmetro
+      id: userId,
       ...validatedData,
       updated_at: new Date().toISOString(),
     });
 
     if (error) {
       console.error("Erro Supabase:", error);
-      throw new Error(`Erro ao atualizar perfil: ${error.message}`);
+      return { success: false, error: error.message };
     }
 
-    // 🔄 Atualizar cache e redirecionar
+    // 🔄 Atualizar cache apenas
     revalidatePath("/dashboard/profile");
-    redirect("/dashboard/profile?success=true");
+
+    // ✅ Retornar sucesso sem redirecionar
+    return {
+      success: true,
+      message: "Perfil atualizado com sucesso!",
+    };
   } catch (error) {
-    // ✅ CORREÇÃO: Usar 'issues' em vez de 'errors'
     if (error instanceof z.ZodError) {
       const errorMessages = error.issues
         .map((issue: { message: string }) => issue.message)
         .join(", ");
-      throw new Error(`Dados inválidos: ${errorMessages}`);
+      return { success: false, error: `Dados inválidos: ${errorMessages}` };
     }
-    throw error; // Repassar outros erros
+    return { success: false, error: "Erro desconhecido" };
   }
 }
