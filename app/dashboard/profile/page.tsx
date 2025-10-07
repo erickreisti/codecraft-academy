@@ -1,4 +1,4 @@
-// app/dashboard/profile/page.tsx - VERSÃO COM TIPAGEM CORRIGIDA
+// app/dashboard/profile/page.tsx - VERSÃO SEM MENSAGEM DE SUCESSO EXTRA
 "use client";
 
 import { useState, useEffect } from "react";
@@ -35,7 +35,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState(false);
+  // REMOVIDO: const [success, setSuccess] = useState(false); // Não é mais necessário
 
   // 🔍 BUSCAR SESSÃO E DADOS DO USUÁRIO
   useEffect(() => {
@@ -77,15 +77,7 @@ export default function ProfilePage() {
     fetchUserData();
   }, [router]);
 
-  // Verificar success da URL
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("success") === "true") {
-      setSuccess(true);
-      // Limpar após 5 segundos
-      setTimeout(() => setSuccess(false), 5000);
-    }
-  }, []);
+  // REMOVIDO: useEffect para verificar success da URL, pois não é mais usado
 
   // Calcular tempo como membro
   const memberSince = session ? new Date(session.user.created_at) : new Date();
@@ -115,7 +107,7 @@ export default function ProfilePage() {
       const result = await updateProfile(session.user.id, formData);
 
       if (result.success) {
-        setSuccess(true);
+        // REMOVIDO: setSuccess(true);
         toast.success("Perfil atualizado!", {
           description: "Suas alterações foram salvas com sucesso.",
         });
@@ -129,8 +121,7 @@ export default function ProfilePage() {
 
         setProfile(updatedProfile);
 
-        // Esconder mensagem após 3 segundos
-        setTimeout(() => setSuccess(false), 3000);
+        // REMOVIDO: setTimeout para esconder mensagem de sucesso, pois não existe mais
       } else {
         toast.error("Erro ao salvar", {
           description: result.error,
@@ -190,19 +181,7 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* MENSAGEM DE SUCESSO */}
-                {success && (
-                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg flex items-center gap-3">
-                    <span className="text-xl">✅</span>
-                    <div>
-                      <p className="font-semibold">Perfil atualizado!</p>
-                      <p className="text-sm">
-                        Suas informações foram salvas com sucesso.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
+                {/* FORMULÁRIO */}
                 <form action={handleSaveProfile} className="space-y-6">
                   {/* Email (somente leitura) */}
                   <div className="space-y-2">
@@ -273,7 +252,7 @@ export default function ProfilePage() {
                       name="website"
                       type="url"
                       defaultValue={profile?.website || ""}
-                      placeholder="https://seusite.com"
+                      placeholder="https://seusite.com  "
                     />
                   </div>
 
