@@ -1,4 +1,4 @@
-// app/actions/profile-actions.ts
+// app/actions/profile-actions.ts - VERSÃO CORRIGIDA
 "use server";
 
 import { createServerClient } from "@/lib/supabase/server";
@@ -15,28 +15,21 @@ const profileSchema = z.object({
   website: z.string().url("URL deve ser válida").optional().or(z.literal("")),
 });
 
-export async function updateProfile(formData: FormData) {
+// ✅ MUDANÇA: Receber userId explicitamente
+export async function updateProfile(userId: string, formData: FormData) {
   const supabase = createServerClient();
 
-  // 🔐 Validar sessão
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session) {
-    throw new Error("Não autorizado - faça login novamente");
-  }
-
   try {
-    // 📋 Validar dados
+    // 📋 Validar dados do formulário
     const validatedData = profileSchema.parse({
       full_name: formData.get("full_name"),
       bio: formData.get("bio"),
       website: formData.get("website"),
     });
 
-    // 💾 Atualizar perfil
+    // 💾 Atualizar perfil no Supabase
     const { error } = await supabase.from("profiles").upsert({
-      id: session.user.id,
+      id: userId, // ✅ Usar userId passado como parâmetro
       ...validatedData,
       updated_at: new Date().toISOString(),
     });
@@ -46,16 +39,17 @@ export async function updateProfile(formData: FormData) {
       throw new Error(`Erro ao atualizar perfil: ${error.message}`);
     }
 
-    // 🔄 Atualizar cache
+    // 🔄 Atualizar cache e redirecionar
     revalidatePath("/dashboard/profile");
     redirect("/dashboard/profile?success=true");
   } catch (error) {
+    // ✅ CORREÇÃO: Usar 'issues' em vez de 'errors'
     if (error instanceof z.ZodError) {
       const errorMessages = error.issues
         .map((issue: { message: string }) => issue.message)
         .join(", ");
       throw new Error(`Dados inválidos: ${errorMessages}`);
     }
-    throw error;
+    throw error; // Repassar outros erros
   }
 }

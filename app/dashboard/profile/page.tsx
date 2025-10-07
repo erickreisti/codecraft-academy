@@ -163,7 +163,12 @@ export default function ProfilePage() {
                   </div>
                 )}
 
-                <form action={updateProfile} className="space-y-6">
+                <form
+                  action={(formData) =>
+                    updateProfile(session.user.id, formData)
+                  }
+                  className="space-y-6"
+                >
                   {/* Email (somente leitura) */}
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center gap-2">
