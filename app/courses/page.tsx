@@ -25,6 +25,7 @@ import {
 import { Header } from "@/components/layout/header";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import Link from "next/link";
+import { SafeImage } from "@/components/ui/safe-image";
 
 export default async function CoursesPage() {
   // Cria cliente do Supabase para Server Component
@@ -59,8 +60,21 @@ export default async function CoursesPage() {
               <Card key={course.id} className="feature-card group">
                 <CardHeader className="pb-4">
                   {/* IMAGEM/THUMBNAIL DO CURSO */}
-                  <div className="h-48 gradient-bg rounded-lg flex items-center justify-center mb-4">
-                    <span className="text-white text-5xl">📚</span>
+                  <div className="h-48 gradient-bg rounded-lg flex items-center justify-center mb-4 relative overflow-hidden">
+                    <SafeImage
+                      src={course.image_url}
+                      alt={course.title}
+                      width={192}
+                      height={192}
+                      className="w-full h-full object-cover absolute inset-0" // ABSOLUTE PARA COBERTURA TOTAL
+                      fallback={
+                        <div className="flex items-center justify-center w-full h-full">
+                          <span className="text-white text-5xl">📚</span>
+                        </div>
+                      }
+                    />
+                    {/* OVERLAY PARA MELHOR CONTRASTE */}
+                    <div className="absolute inset-0 bg-black/10 hover:bg-black/20 transition-colors"></div>
                   </div>
 
                   {/* TÍTULO E DESCRIÇÃO */}

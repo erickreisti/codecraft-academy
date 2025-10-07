@@ -18,7 +18,7 @@ export interface Course {
   duration_hours: number;
   level: "iniciante" | "intermediario" | "avancado";
   category: string;
-  image_url: string;
+  image_url?: string | null;
   featured: boolean;
   published: boolean;
   created_at: string;

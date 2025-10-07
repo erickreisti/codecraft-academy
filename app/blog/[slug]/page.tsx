@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/header";
 import { createServerClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation"; // Hook para mostrar página 404
+import Link from "next/link";
 
 interface BlogPostPageProps {
   // Interface para as props
@@ -77,10 +78,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <p className="text-muted-foreground mb-6">
               Confira nossos cursos e acelere sua carreira em programação
             </p>
-            <a href="/courses" className="btn btn-primary btn-lg">
+            <Link href="/courses" className="btn btn-primary btn-lg">
               {/* Botão grande */}
               Explorar Cursos
-            </a>
+            </Link>
           </div>
         </div>
       </article>

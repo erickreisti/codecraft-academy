@@ -1,13 +1,9 @@
-// components/cart/add-to-cart-button.tsx
+// components/cart/add-to-cart-button.tsx - VERSÃO CORRIGIDA
 
 /**
  * BOTÃO ADICIONAR AO CARRINHO
  *
- * Componente inteligente que:
- * - Mostra estado atual do curso no carrinho
- * - Gerencia loading durante a adição
- * - Feedback visual com estados diferentes
- * - Integração com Sonner para notificações
+ * CORREÇÃO: Tipagem do image_url para aceitar string | null
  */
 
 "use client";
@@ -35,30 +31,22 @@ export function AddToCartButton({
   const { addItem, isInCart } = useCartStore();
   const [isAdding, setIsAdding] = useState(false);
 
-  /**
-   * HANDLE ADD TO CART
-   * Gerencia o processo de adicionar curso ao carrinho
-   * Inclui loading state e notificação de sucesso
-   */
   const handleAddToCart = async () => {
-    // Validações iniciais
     if (isInCart(course.id) || course.price === 0) return;
 
     setIsAdding(true);
 
-    // Simula delay para melhor UX
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // Adiciona ao carrinho
+    // CORREÇÃO: Converter null para undefined
     addItem({
       id: course.id,
       title: course.title,
       price: course.price,
-      image_url: course.image_url,
+      image_url: course.image_url || undefined, // Converte null para undefined
       slug: course.slug,
     });
 
-    // Notificação de sucesso
     toast.success("Curso adicionado ao carrinho!", {
       description: `"${course.title}" foi adicionado com sucesso.`,
       action: {
@@ -70,7 +58,7 @@ export function AddToCartButton({
     setIsAdding(false);
   };
 
-  // CASO 1: Curso gratuito - Redireciona direto para o curso
+  // Curso gratuito
   if (course.price === 0) {
     return (
       <Button
@@ -87,7 +75,7 @@ export function AddToCartButton({
     );
   }
 
-  // CASO 2: Já está no carrinho - Botão desabilitado
+  // Já está no carrinho
   if (isInCart(course.id)) {
     return (
       <Button
@@ -102,7 +90,7 @@ export function AddToCartButton({
     );
   }
 
-  // CASO 3: Disponível para adicionar - Botão ativo
+  // Disponível para adicionar
   return (
     <Button
       variant={variant}
