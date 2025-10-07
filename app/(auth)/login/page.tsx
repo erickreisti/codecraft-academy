@@ -1,7 +1,7 @@
-// app/login/page.tsx - VERSÃO CORRIGIDA
+// app/login/page.tsx - VERSÃO SEM DEBUG E SEM ERROS ESLINT
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,63 +15,18 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // 🔧 LIMPEZA AUTOMÁTICA DE SESSÕES CORROMPIDAS
-  useEffect(() => {
-    const clearStaleSession = async () => {
-      try {
-        console.log("🔄 Verificando sessões corrompidas...");
-
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-
-        if (session?.user) {
-          console.log("💥 Sessão corrompida detectada, limpando...");
-
-          // Verificar se a sessão é realmente válida
-          const { data: userData, error: userError } = await supabase
-            .from("profiles")
-            .select("id")
-            .eq("id", session.user.id)
-            .single();
-
-          if (userError || !userData) {
-            console.log("🚮 Sessão inválida - limpando automaticamente");
-            await supabase.auth.signOut();
-            localStorage.removeItem("supabase.auth.token");
-            sessionStorage.removeItem("supabase.auth.token");
-
-            toast.info("Sessão anterior foi limpa", {
-              description: "Faça login novamente.",
-            });
-          }
-        }
-      } catch (error) {
-        console.error("Erro ao verificar sessão:", error);
-        // Em caso de erro, limpar tudo por segurança
-        await supabase.auth.signOut();
-        localStorage.clear();
-      }
-    };
-
-    clearStaleSession();
-  }, []);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
     try {
-      console.log("🔄 Tentando login...", { email });
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error("❌ Erro login:", error);
         setError(error.message);
         toast.error("Erro no login", {
           description: error.message,
@@ -80,52 +35,20 @@ export default function LoginPage() {
       }
 
       if (data?.user) {
-        console.log("✅ Login bem-sucedido!", data.user.email);
-
         toast.success("Login realizado com sucesso!", {
           description: "Redirecionando para o dashboard...",
         });
 
-        // ✅ CORREÇÃO: Redirecionamento mais robusto
-        // Aguardar um pouco para garantir que a sessão foi salva
+        // Redirecionamento após sucesso
         setTimeout(() => {
-          console.log("🔄 Redirecionando para /dashboard");
-          // Usar replace em vez de href para evitar problemas de histórico
           window.location.replace("/dashboard");
         }, 1000);
       }
-    } catch (err) {
-      console.error("💥 ERRO CATCH:", err);
+    } catch {
       setError("Erro inesperado ao fazer login");
       toast.error("Erro inesperado", {
         description: "Tente novamente",
       });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // 🔧 BOTÃO DE LIMPEZA MANUAL (DEBUG)
-  const handleClearCache = async () => {
-    try {
-      setLoading(true);
-      console.log("🧹 Limpando cache manualmente...");
-
-      await supabase.auth.signOut();
-      localStorage.clear();
-      sessionStorage.clear();
-
-      toast.success("Cache limpo com sucesso!", {
-        description: "Agora tente fazer login novamente.",
-      });
-
-      // Recarregar a página
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error) {
-      console.error("Erro ao limpar cache:", error);
-      toast.error("Erro ao limpar cache");
     } finally {
       setLoading(false);
     }
@@ -198,17 +121,6 @@ export default function LoginPage() {
               "Entrar"
             )}
           </Button>
-
-          {/* Botão de Limpeza (Debug) */}
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleClearCache}
-            disabled={loading}
-            className="w-full text-sm"
-          >
-            🗑️ Limpar Cache (Se travou)
-          </Button>
         </form>
 
         {/* Links de Navegação */}
@@ -225,14 +137,6 @@ export default function LoginPage() {
           >
             Esqueceu sua senha?
           </Link>
-        </div>
-
-        {/* Informação de Debug */}
-        <div className="text-center text-xs text-muted-foreground mt-8 p-4 bg-muted/30 rounded-lg">
-          <p>
-            🔧 <strong>Problema de login?</strong>
-          </p>
-          <p>Use o botão Limpar Cache acima</p>
         </div>
       </div>
     </div>
