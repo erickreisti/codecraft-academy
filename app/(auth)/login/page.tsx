@@ -1,54 +1,60 @@
-// app/login/page.tsx - VERSÃO CORRIGIDA
-"use client"; // Componente do lado do cliente
+// app/login/page.tsx - CORREÇÃO DO REDIRECIONAMENTO
+"use client";
 
-import { useState } from "react"; // Hook para estado
-import Link from "next/link"; // Navegação
-import { Button } from "@/components/ui/button"; // Componentes UI
+import { useState } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/lib/supabase/client"; // Cliente Supabase
+import { supabase } from "@/lib/supabase/client";
+import { toast } from "sonner"; // ✅ Adicionar import
 
 export default function LoginPage() {
-  // Estados do formulário
-  const [email, setEmail] = useState(""); // Email do usuário
-  const [password, setPassword] = useState(""); // Senha do usuário
-  const [loading, setLoading] = useState(false); // Estado de carregamento
-  const [error, setError] = useState(""); // Mensagens de erro
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault(); // Previne submit padrão
-    setLoading(true); // Ativa carregamento
-    setError(""); // Limpa erros
+    e.preventDefault();
+    setLoading(true);
+    setError("");
 
     try {
-      // Tenta fazer login com Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        setError(error.message); // Exibe erro de autenticação
+        setError(error.message);
+        toast.error("Erro no login", {
+          description: error.message,
+        });
       } else if (data?.user) {
-        // Se login bem sucedido
-        // Dar tempo para os cookies serem salvos
-        setTimeout(() => {
-          window.location.href = "/dashboard"; // Redireciona para dashboard
-        }, 1000); // Espera 1 segundo
+        toast.success("Login realizado com sucesso!", {
+          description: "Redirecionando para o dashboard...",
+        });
+
+        // ✅ CORREÇÃO: Redirecionamento direto e simples
+        window.location.href = "/dashboard";
       }
     } catch (err) {
-      console.error("💥 ERRO CATCH:", err); // Log de erro
-      setError("Erro ao fazer login"); // Mensagem genérica
+      console.error("💥 ERRO CATCH:", err);
+      setError("Erro ao fazer login");
+      toast.error("Erro inesperado", {
+        description: "Tente novamente",
+      });
     } finally {
-      setLoading(false); // Desativa carregamento
+      setLoading(false);
     }
   };
 
+  // ... resto do código permanece igual
   return (
-    // Estrutura similar à página de recuperação
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8">
-        {/* Cabeçalho com logo */}
+        {/* Cabeçalho */}
         <div className="text-center">
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
             <div className="h-10 w-10 gradient-bg rounded-xl flex items-center justify-center">
@@ -56,20 +62,18 @@ export default function LoginPage() {
             </div>
             <span className="font-bold text-2xl gradient-text">CodeCraft</span>
           </Link>
-
           <h1 className="text-3xl font-bold">Entre na sua conta</h1>
           <p className="text-muted-foreground mt-2">Acesse sua área de aluno</p>
         </div>
 
-        {/* Formulário de login */}
+        {/* Formulário */}
         <form onSubmit={handleLogin} className="space-y-6">
-          {error && ( // Exibe erro se existir
+          {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
 
-          {/* Campo email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -82,7 +86,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Campo senha */}
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
             <Input
@@ -95,7 +98,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Botão de login */}
           <Button
             type="submit"
             className="btn btn-primary w-full"
@@ -105,7 +107,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
-        {/* Links de navegação */}
+        {/* Links */}
         <div className="text-center space-y-4">
           <Link href="/register" className="block text-primary hover:underline">
             Não tem conta? Cadastre-se

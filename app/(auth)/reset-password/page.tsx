@@ -1,18 +1,14 @@
-/**
- * PÁGINA DE CRIAÇÃO DE NOVA SENHA - CodeCraft Academy
- *
- * Página acessada via link do email de redefinição
- * Permite ao usuário criar uma nova senha
- */
-
+// app/reset-password/page.tsx - NOVO ARQUIVO
 "use client";
 
-import { useState, useEffect } from "react"; // useEffect para side effects
-import { useRouter, useSearchParams } from "next/navigation"; // Hooks para roteamento e parâmetros URL
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -20,32 +16,26 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [tokenValid, setTokenValid] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams(); // Hook para acessar parâmetros da URL
+  const searchParams = useSearchParams();
 
-  /**
-   * VERIFICA SE HÁ UM TOKEN VÁLIDO NA URL
-   * O Supabase adiciona automaticamente tokens de recuperação na URL
-   */
+  // Verificar se há um token válido na URL
   useEffect(() => {
-    // Verifica se há parâmetros de recuperação na URL
-    const token = searchParams.get("token"); // Pega token da URL
-    const type = searchParams.get("type"); // Pega tipo da URL
+    const checkToken = async () => {
+      const token = searchParams.get("token");
+      const type = searchParams.get("type");
 
-    if (token && type === "recovery") {
-      // Troca o código por uma sessão
-      supabase.auth
-        .verifyOtp({
-          token_hash: token,
-          type: "recovery",
-        })
-        .then(({ error }) => {
-          if (error) {
-            setError("Link inválido ou expirado"); // Token inválido
-          }
-        });
-    }
-  }, [searchParams]); // Executa quando searchParams mudar
+      if (token && type === "recovery") {
+        setTokenValid(true);
+      } else {
+        setError("Link inválido ou expirado");
+        toast.error("Link inválido");
+      }
+    };
+
+    checkToken();
+  }, [searchParams]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,26 +56,51 @@ export default function ResetPasswordPage() {
     }
 
     try {
-      // Atualiza a senha do usuário
+      // Atualizar a senha
       const { error } = await supabase.auth.updateUser({
         password: password,
       });
 
       if (error) {
         setError(error.message);
+        toast.error("Erro ao redefinir senha", {
+          description: error.message,
+        });
       } else {
         setSuccess(true);
-        // Redireciona para login após 3 segundos
+        toast.success("Senha redefinida com sucesso!", {
+          description: "Redirecionando para o login...",
+        });
+
+        // Redirecionar para login após 3 segundos
         setTimeout(() => {
           router.push("/login");
         }, 3000);
       }
     } catch {
       setError("Erro ao redefinir senha");
+      toast.error("Erro inesperado");
     } finally {
       setLoading(false);
     }
   };
+
+  if (!tokenValid && !success) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center space-y-6">
+          <div className="text-6xl">❌</div>
+          <h1 className="text-2xl font-bold">Link inválido</h1>
+          <p className="text-muted-foreground">
+            Este link de redefinição é inválido ou expirou.
+          </p>
+          <Button asChild className="btn btn-primary">
+            <Link href="/forgot-password">Solicitar novo link</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -97,7 +112,7 @@ export default function ResetPasswordPage() {
           </p>
         </div>
 
-        {success ? ( // Se sucesso, mostra mensagem
+        {success ? (
           <div className="text-center space-y-4">
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
               <div className="flex items-center justify-center gap-2 mb-2">
@@ -108,7 +123,6 @@ export default function ResetPasswordPage() {
             </div>
           </div>
         ) : (
-          // Se não, mostra formulário
           <form onSubmit={handleResetPassword} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
@@ -126,6 +140,7 @@ export default function ResetPasswordPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
+                disabled={loading}
               />
             </div>
 
@@ -138,6 +153,7 @@ export default function ResetPasswordPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                disabled={loading}
               />
             </div>
 
@@ -146,7 +162,14 @@ export default function ResetPasswordPage() {
               className="btn btn-primary w-full"
               disabled={loading}
             >
-              {loading ? "Redefinindo..." : "Redefinir Senha"}
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Redefinindo...
+                </div>
+              ) : (
+                "Redefinir Senha"
+              )}
             </Button>
           </form>
         )}
