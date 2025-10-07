@@ -1,10 +1,10 @@
-// app/reset-password/page.tsx - NOVO ARQUIVO
+// app/reset-password/page.tsx - VERSÃO CORRIGIDA
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
@@ -16,26 +16,36 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [tokenValid, setTokenValid] = useState(false);
+  const [tokenValid, setTokenValid] = useState(true); // ✅ Assume válido inicialmente
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  // Verificar se há um token válido na URL
+  // ✅ VERIFICAR SE O USUÁRIO ESTÁ AUTENTICADO (token já foi processado)
   useEffect(() => {
-    const checkToken = async () => {
-      const token = searchParams.get("token");
-      const type = searchParams.get("type");
+    const checkAuthentication = async () => {
+      try {
+        console.log("🔍 Verificando autenticação para reset de senha...");
 
-      if (token && type === "recovery") {
-        setTokenValid(true);
-      } else {
-        setError("Link inválido ou expirado");
-        toast.error("Link inválido");
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (!session) {
+          console.log("❌ Usuário não autenticado para reset de senha");
+          setTokenValid(false);
+          setError("Sessão expirada. Solicite um novo link de redefinição.");
+        } else {
+          console.log("✅ Usuário autenticado, pode redefinir senha");
+          setTokenValid(true);
+        }
+      } catch (error) {
+        console.error("Erro ao verificar autenticação:", error);
+        setTokenValid(false);
+        setError("Erro ao verificar autenticação");
       }
     };
 
-    checkToken();
-  }, [searchParams]);
+    checkAuthentication();
+  }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,17 +66,21 @@ export default function ResetPasswordPage() {
     }
 
     try {
+      console.log("🔄 Atualizando senha...");
+
       // Atualizar a senha
       const { error } = await supabase.auth.updateUser({
         password: password,
       });
 
       if (error) {
+        console.error("❌ Erro ao atualizar senha:", error);
         setError(error.message);
         toast.error("Erro ao redefinir senha", {
           description: error.message,
         });
       } else {
+        console.log("✅ Senha atualizada com sucesso!");
         setSuccess(true);
         toast.success("Senha redefinida com sucesso!", {
           description: "Redirecionando para o login...",
@@ -77,7 +91,8 @@ export default function ResetPasswordPage() {
           router.push("/login");
         }, 3000);
       }
-    } catch {
+    } catch (err) {
+      console.error("💥 Erro inesperado:", err);
       setError("Erro ao redefinir senha");
       toast.error("Erro inesperado");
     } finally {
@@ -90,13 +105,18 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-6">
           <div className="text-6xl">❌</div>
-          <h1 className="text-2xl font-bold">Link inválido</h1>
+          <h1 className="text-2xl font-bold">Link inválido ou expirado</h1>
           <p className="text-muted-foreground">
-            Este link de redefinição é inválido ou expirou.
+            {error || "Este link de redefinição é inválido ou expirou."}
           </p>
-          <Button asChild className="btn btn-primary">
-            <Link href="/forgot-password">Solicitar novo link</Link>
-          </Button>
+          <div className="space-y-3">
+            <Button asChild className="btn btn-primary w-full">
+              <Link href="/forgot-password">Solicitar novo link</Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href="/login">Voltar para o login</Link>
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -106,9 +126,9 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Nova Senha</h1>
+          <h1 className="text-3xl font-bold">Criar Nova Senha</h1>
           <p className="text-muted-foreground mt-2">
-            Crie uma nova senha para sua conta
+            Digite sua nova senha abaixo
           </p>
         </div>
 
@@ -126,7 +146,10 @@ export default function ResetPasswordPage() {
           <form onSubmit={handleResetPassword} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
+                <div className="flex items-center gap-2">
+                  <span>⚠️</span>
+                  <span>{error}</span>
+                </div>
               </div>
             )}
 
