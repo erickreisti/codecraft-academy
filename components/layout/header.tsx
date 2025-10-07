@@ -11,7 +11,7 @@
  * - Navegação principal
  * - Toggle de tema claro/escuro
  * - Ícone do carrinho com contador
- * - Estado de autenticação do usuário (exibe nome completo e link para dashboard)
+ * - Estado de autenticação do usuário (exibe nome completo, link para dashboard com background chamativo)
  * - Sidebar do carrinho
  */
 
@@ -26,7 +26,7 @@ import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { supabase } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { ShoppingCart, User as UserIcon } from "lucide-react"; // Importando ícone opcional
+import { ShoppingCart, User as UserIcon } from "lucide-react";
 
 // Interface simplificada para o perfil do usuário (apenas o necessário)
 interface UserProfile {
@@ -229,9 +229,9 @@ export function Header() {
               {/* Link para o Dashboard */}
               <Link href="/dashboard" className="hidden sm:inline">
                 <Button
-                  variant="ghost" // Usando variant ghost para um estilo mais leve
+                  variant="secondary" // <--- AQUI: Usando 'secondary' para um background mais chamativo (definido em globals.css)
                   size="sm"
-                  className="flex items-center gap-1 px-2 py-1 text-sm" // Ajuste de padding e texto
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm" // Ajuste fino de padding e texto para consistência
                 >
                   <UserIcon className="h-4 w-4" /> {/* Ícone opcional */}
                   Dashboard
