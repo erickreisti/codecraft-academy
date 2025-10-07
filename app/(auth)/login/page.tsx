@@ -20,30 +20,16 @@ export default function LoginPage() {
     setError("");
 
     try {
-      console.log("🔐 INICIANDO LOGIN...", { email });
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      console.log("📨 RESPOSTA DO SUPABASE:", {
-        user: data?.user?.id,
-        session: !!data?.session,
-        error: error?.message,
-      });
-
       if (error) {
         setError(error.message);
       } else if (data?.user) {
-        console.log("✅ LOGIN BEM-SUCEDIDO!");
-
-        // 🎯 ESTRATÉGIA: Forçar atualização completa
-        console.log("🔄 Forçando atualização completa da página...");
-
         // Dar tempo para os cookies serem salvos
         setTimeout(() => {
-          console.log("🚀 Redirecionando com window.location.href");
           window.location.href = "/dashboard";
         }, 1000);
       }

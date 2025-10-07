@@ -44,18 +44,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
-      {/*
-        suppressHydrationWarning: 
-        - Evita warning do React quando há conflito entre HTML renderizado 
-          no servidor e no cliente durante a hidratação
-        - Comum quando usamos temas que mudam classes CSS no cliente
-      */}
+    <html lang="pt-BR" suppressHydrationWarning data-scroll-behavior="smooth">
       <body className={inter.className}>
-        {/*
-          Providers: Componente que agrupa todos os context providers
-          da aplicação (tema, autenticação, estado global, etc)
-        */}
         <Providers>
           <div className="min-h-screen flex flex-col">
             {children}
