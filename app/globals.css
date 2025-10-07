@@ -651,3 +651,18 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* 🎨 ESTILOS ADICIONAIS PARA MELHORIAS VISUAIS */
+@layer components {
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .hover-lift:hover {
+    @apply transform translate-y-[-2px] shadow-lg;
+  }
+
+  .btn-lg {
+    @apply h-11 px-8 text-base;
+  }
+}
