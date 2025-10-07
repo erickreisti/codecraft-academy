@@ -5,11 +5,11 @@
  * Inclui validação de senha e confirmação de email
  */
 
-"use client"; // Necessário para hooks e estado
+"use client"; // Componente cliente
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation"; // Hook para navegação programática
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,10 +19,10 @@ export default function RegisterPage() {
   // Estados do formulário
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // Confirmação de senha
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const router = useRouter();
+  const router = useRouter(); // Hook para redirecionamento
 
   /**
    * FUNÇÃO DE REGISTRO
@@ -65,6 +65,7 @@ export default function RegisterPage() {
   };
 
   return (
+    // Estrutura similar às outras páginas
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8">
         {/* CABEÇALHO */}

@@ -1,49 +1,54 @@
 // app/login/page.tsx - VERSÃO CORRIGIDA
-"use client";
+"use client"; // Componente do lado do cliente
 
-import { useState } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { useState } from "react"; // Hook para estado
+import Link from "next/link"; // Navegação
+import { Button } from "@/components/ui/button"; // Componentes UI
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/lib/supabase/client";
+import { supabase } from "@/lib/supabase/client"; // Cliente Supabase
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  // Estados do formulário
+  const [email, setEmail] = useState(""); // Email do usuário
+  const [password, setPassword] = useState(""); // Senha do usuário
+  const [loading, setLoading] = useState(false); // Estado de carregamento
+  const [error, setError] = useState(""); // Mensagens de erro
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+    e.preventDefault(); // Previne submit padrão
+    setLoading(true); // Ativa carregamento
+    setError(""); // Limpa erros
 
     try {
+      // Tenta fazer login com Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        setError(error.message);
+        setError(error.message); // Exibe erro de autenticação
       } else if (data?.user) {
+        // Se login bem sucedido
         // Dar tempo para os cookies serem salvos
         setTimeout(() => {
-          window.location.href = "/dashboard";
-        }, 1000);
+          window.location.href = "/dashboard"; // Redireciona para dashboard
+        }, 1000); // Espera 1 segundo
       }
     } catch (err) {
-      console.error("💥 ERRO CATCH:", err);
-      setError("Erro ao fazer login");
+      console.error("💥 ERRO CATCH:", err); // Log de erro
+      setError("Erro ao fazer login"); // Mensagem genérica
     } finally {
-      setLoading(false);
+      setLoading(false); // Desativa carregamento
     }
   };
 
   return (
+    // Estrutura similar à página de recuperação
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8">
+        {/* Cabeçalho com logo */}
         <div className="text-center">
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
             <div className="h-10 w-10 gradient-bg rounded-xl flex items-center justify-center">
@@ -56,13 +61,15 @@ export default function LoginPage() {
           <p className="text-muted-foreground mt-2">Acesse sua área de aluno</p>
         </div>
 
+        {/* Formulário de login */}
         <form onSubmit={handleLogin} className="space-y-6">
-          {error && (
+          {error && ( // Exibe erro se existir
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
 
+          {/* Campo email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -75,6 +82,7 @@ export default function LoginPage() {
             />
           </div>
 
+          {/* Campo senha */}
           <div className="space-y-2">
             <Label htmlFor="password">Senha</Label>
             <Input
@@ -87,6 +95,7 @@ export default function LoginPage() {
             />
           </div>
 
+          {/* Botão de login */}
           <Button
             type="submit"
             className="btn btn-primary w-full"
@@ -96,6 +105,7 @@ export default function LoginPage() {
           </Button>
         </form>
 
+        {/* Links de navegação */}
         <div className="text-center space-y-4">
           <Link href="/register" className="block text-primary hover:underline">
             Não tem conta? Cadastre-se

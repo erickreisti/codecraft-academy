@@ -6,31 +6,31 @@
  * Integrado com Supabase Auth
  */
 
-"use client"; // Necessário para hooks e estado
+"use client"; // Necessário para hooks e estado - indica que é um componente React do lado do cliente
 
-import { useState } from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { supabase } from "@/lib/supabase/client";
+import { useState } from "react"; // Importa hook para gerenciar estado
+import Link from "next/link"; // Componente para navegação entre páginas
+import { Button } from "@/components/ui/button"; // Componente de botão personalizado
+import { Input } from "@/components/ui/input"; // Componente de input personalizado
+import { Label } from "@/components/ui/label"; // Componente de label personalizado
+import { supabase } from "@/lib/supabase/client"; // Cliente do Supabase para autenticação
 
 export default function ForgotPasswordPage() {
   // Estados do formulário
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false); // Controla estado de sucesso
+  const [email, setEmail] = useState(""); // Estado para armazenar o email digitado
+  const [loading, setLoading] = useState(false); // Estado para controlar carregamento
+  const [error, setError] = useState(""); // Estado para mensagens de erro
+  const [success, setSuccess] = useState(false); // Controla estado de sucesso após envio
 
   /**
    * FUNÇÃO DE SOLICITAÇÃO DE REDEFINIÇÃO
    * Envia email com link para redefinir senha
    */
   const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    setSuccess(false);
+    e.preventDefault(); // Previne comportamento padrão do formulário
+    setLoading(true); // Ativa estado de carregamento
+    setError(""); // Limpa erros anteriores
+    setSuccess(false); // Reseta estado de sucesso
 
     try {
       // Solicita redefinição de senha via Supabase Auth
@@ -40,25 +40,29 @@ export default function ForgotPasswordPage() {
       });
 
       if (error) {
-        setError(error.message);
+        setError(error.message); // Exibe erro se houver
       } else {
         // Mostra mensagem de sucesso (mesmo se email não existir, por segurança)
-        setSuccess(true);
+        setSuccess(true); // Ativa estado de sucesso
       }
     } catch {
-      setError("Erro ao solicitar redefinição de senha");
+      setError("Erro ao solicitar redefinição de senha"); // Erro genérico em caso de falha
     } finally {
-      setLoading(false);
+      setLoading(false); // Desativa carregamento independente do resultado
     }
   };
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      {/* Container principal que ocupa tela toda e centraliza conteúdo */}
       <div className="max-w-md w-full space-y-8">
+        {/* Container com largura máxima e espaçamento entre elementos */}
+
         {/* CABEÇALHO DA PÁGINA */}
         <div className="text-center">
           {/* Logo clicável para voltar à home */}
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
+            {/* Container do logo */}
             <div className="h-10 w-10 gradient-bg rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-lg">C</span>
             </div>
@@ -73,11 +77,11 @@ export default function ForgotPasswordPage() {
         </div>
 
         {/* CONDICIONAL: Mostra formulário OU mensagem de sucesso */}
-        {!success ? (
+        {!success ? ( // Se NÃO houve sucesso, mostra formulário
           // FORMULÁRIO DE SOLICITAÇÃO
           <form onSubmit={handleResetPassword} className="space-y-6">
             {/* EXIBIÇÃO DE ERROS */}
-            {error && (
+            {error && ( // Se há erro, exibe mensagem
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
                 {error}
               </div>
@@ -99,7 +103,7 @@ export default function ForgotPasswordPage() {
                 type="email"
                 placeholder="seu@email.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)} // Atualiza estado com valor digitado
                 required
               />
             </div>
@@ -108,12 +112,13 @@ export default function ForgotPasswordPage() {
             <Button
               type="submit"
               className="btn btn-primary w-full"
-              disabled={loading}
+              disabled={loading} // Desabilita botão durante carregamento
             >
               {loading ? "Enviando..." : "Enviar Link de Redefinição"}
             </Button>
           </form>
         ) : (
+          // Se HOUVE sucesso, mostra mensagem
           // MENSAGEM DE SUCESSO
           <div className="text-center space-y-6">
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
@@ -148,7 +153,7 @@ export default function ForgotPasswordPage() {
           </Link>
 
           {/* Link para criar nova conta (apenas se não tiver sucesso) */}
-          {!success && (
+          {!success && ( // Só mostra link de cadastro se não houve sucesso
             <Link
               href="/register"
               className="block text-muted-foreground hover:underline text-sm"

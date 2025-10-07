@@ -7,8 +7,8 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react"; // useEffect para side effects
+import { useRouter, useSearchParams } from "next/navigation"; // Hooks para roteamento e parâmetros URL
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,7 +21,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
+  const searchParams = useSearchParams(); // Hook para acessar parâmetros da URL
 
   /**
    * VERIFICA SE HÁ UM TOKEN VÁLIDO NA URL
@@ -29,8 +29,8 @@ export default function ResetPasswordPage() {
    */
   useEffect(() => {
     // Verifica se há parâmetros de recuperação na URL
-    const token = searchParams.get("token");
-    const type = searchParams.get("type");
+    const token = searchParams.get("token"); // Pega token da URL
+    const type = searchParams.get("type"); // Pega tipo da URL
 
     if (token && type === "recovery") {
       // Troca o código por uma sessão
@@ -41,11 +41,11 @@ export default function ResetPasswordPage() {
         })
         .then(({ error }) => {
           if (error) {
-            setError("Link inválido ou expirado");
+            setError("Link inválido ou expirado"); // Token inválido
           }
         });
     }
-  }, [searchParams]);
+  }, [searchParams]); // Executa quando searchParams mudar
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,7 +97,7 @@ export default function ResetPasswordPage() {
           </p>
         </div>
 
-        {success ? (
+        {success ? ( // Se sucesso, mostra mensagem
           <div className="text-center space-y-4">
             <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
               <div className="flex items-center justify-center gap-2 mb-2">
@@ -108,6 +108,7 @@ export default function ResetPasswordPage() {
             </div>
           </div>
         ) : (
+          // Se não, mostra formulário
           <form onSubmit={handleResetPassword} className="space-y-6">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
