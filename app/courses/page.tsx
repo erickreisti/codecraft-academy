@@ -1,19 +1,3 @@
-// app/courses/page.tsx
-
-/**
- * PÁGINA DE LISTAGEM DE CURSOS
- *
- * Página que mostra todos os cursos disponíveis na plataforma
- *
- * Funcionalidades:
- * - Lista cursos com paginação
- * - Filtros por categoria, nível, preço
- * - Layout de cards responsivo
- * - Integração com carrinho de compras
- * - Server-side rendering para SEO
- */
-
-import { createServerClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -25,18 +9,14 @@ import {
 import { Header } from "@/components/layout/header";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import Link from "next/link";
-import { SafeImage } from "@/components/ui/safe-image";
+import { CourseImage } from "@/components/ui/course-image";
+import { getPublishedCourses } from "@/app/actions/course-actions";
 
 export default async function CoursesPage() {
-  // Cria cliente do Supabase para Server Component
-  const supabase = createServerClient();
+  // Usar Server Action para buscar cursos publicados
+  const result = await getPublishedCourses();
 
-  // Busca cursos do banco de dados
-  const { data: courses } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("published", true) // Apenas cursos publicados
-    .order("created_at", { ascending: false }); // Mais recentes primeiro
+  const courses = result.success ? result.data : [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,18 +40,11 @@ export default async function CoursesPage() {
               <Card key={course.id} className="feature-card group">
                 <CardHeader className="pb-4">
                   {/* IMAGEM/THUMBNAIL DO CURSO */}
-                  <div className="h-48 gradient-bg rounded-lg flex items-center justify-center mb-4 relative overflow-hidden">
-                    <SafeImage
+                  <div className="h-48 rounded-lg mb-4 relative overflow-hidden">
+                    <CourseImage
                       src={course.image_url}
                       alt={course.title}
-                      width={192}
-                      height={192}
-                      className="w-full h-full object-cover absolute inset-0" // ABSOLUTE PARA COBERTURA TOTAL
-                      fallback={
-                        <div className="flex items-center justify-center w-full h-full">
-                          <span className="text-white text-5xl">📚</span>
-                        </div>
-                      }
+                      className="rounded-lg"
                     />
                     {/* OVERLAY PARA MELHOR CONTRASTE */}
                     <div className="absolute inset-0 bg-black/10 hover:bg-black/20 transition-colors"></div>

@@ -1,12 +1,16 @@
-/**
- * @type {import('next').NextConfig}
- */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-  // output: 'export', // <-- COMENTADO/REMOVIDO
-  // experimental: {
-  //   serverActions: true, // <-- COMENTADO/REMOVIDO
-  // },
-  // Outras configurações...
+  images: {
+    domains: ["gyarobrsaodtkhilrtru.supabase.co"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "gyarobrsaodtkhilrtru.supabase.co",
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;

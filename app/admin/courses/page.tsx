@@ -1,4 +1,3 @@
-// app/admin/courses/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -9,6 +8,8 @@ import { supabase } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
+import { getAdminCourses, deleteCourse } from "@/app/actions/course-actions";
+import { toast } from "sonner";
 
 interface Course {
   id: string;
@@ -18,6 +19,7 @@ interface Course {
   level: "iniciante" | "intermediario" | "avancado";
   category: string;
   published: boolean;
+  image_url?: string;
   updated_at: string;
 }
 
@@ -75,23 +77,48 @@ export default function AdminCoursesPage() {
   const loadCourses = async () => {
     try {
       setCoursesLoading(true);
-      const { data: courses, error } = await supabase
-        .from("courses")
-        .select(
-          "id, title, slug, price, level, category, published, updated_at"
-        )
-        .order("updated_at", { ascending: false });
 
-      if (error) {
-        console.error("Erro ao buscar cursos:", error);
+      // Usar Server Action
+      const result = await getAdminCourses();
+
+      if (!result.success) {
+        console.error("Erro ao carregar cursos:", result.error);
+        toast.error("Erro ao carregar cursos");
         return;
       }
 
-      setCourses(courses || []);
+      setCourses(result.data || []);
+      console.log(`✅ ${result.data?.length || 0} cursos carregados`);
     } catch (error) {
       console.error("Erro ao carregar cursos:", error);
+      toast.error("Erro ao carregar cursos");
     } finally {
       setCoursesLoading(false);
+    }
+  };
+
+  const handleDeleteCourse = async (courseId: string, courseTitle: string) => {
+    if (!confirm(`Tem certeza que deseja excluir o curso "${courseTitle}"?`)) {
+      return;
+    }
+
+    try {
+      const result = await deleteCourse(courseId);
+
+      if (!result.success) {
+        toast.error("Erro ao excluir curso", {
+          description: result.error,
+        });
+        return;
+      }
+
+      toast.success("Curso excluído com sucesso!");
+
+      // Atualizar lista local
+      setCourses(courses.filter((course) => course.id !== courseId));
+    } catch (error) {
+      console.error("Erro ao excluir curso:", error);
+      toast.error("Erro ao excluir curso");
     }
   };
 
@@ -128,7 +155,7 @@ export default function AdminCoursesPage() {
       <main className="container-custom py-8">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Cursos</CardTitle>
+            <CardTitle>Cursos ({courses.length})</CardTitle>
             <Button asChild className="btn btn-primary">
               <Link href="/admin/courses/new">Novo Curso</Link>
             </Button>
@@ -206,11 +233,34 @@ export default function AdminCoursesPage() {
                               Editar
                             </Link>
                           </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            onClick={() =>
+                              handleDeleteCourse(course.id, course.title)
+                            }
+                          >
+                            Excluir
+                          </Button>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+
+                {courses.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">
+                      Nenhum curso encontrado.
+                    </p>
+                    <Button asChild className="mt-4">
+                      <Link href="/admin/courses/new">
+                        Criar Primeiro Curso
+                      </Link>
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </CardContent>
