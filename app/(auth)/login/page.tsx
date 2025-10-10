@@ -1,4 +1,4 @@
-// app/login/page.tsx - VERSÃO SEM DEBUG E SEM ERROS ESLINT
+// app/login/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -36,12 +36,19 @@ export default function LoginPage() {
 
       if (data?.user) {
         toast.success("Login realizado com sucesso!", {
-          description: "Redirecionando para o dashboard...",
+          description: "Redirecionando...",
         });
 
-        // Redirecionamento após sucesso
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectedFrom = urlParams.get("redirectedFrom");
+
+        // Se foi redirecionado do middleware, voltar para admin
+        // Se não, ir para dashboard normal
+        const redirectTo = redirectedFrom || "/dashboard";
+
         setTimeout(() => {
-          window.location.replace("/dashboard");
+          // CORREÇÃO: Redirecionamento direto sem sync desnecessário
+          window.location.href = redirectTo;
         }, 1000);
       }
     } catch {
@@ -60,10 +67,10 @@ export default function LoginPage() {
         {/* Cabeçalho */}
         <div className="text-center">
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-            <div className="h-10 w-10 gradient-bg rounded-xl flex items-center justify-center">
+            <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-lg">C</span>
             </div>
-            <span className="font-bold text-2xl gradient-text">CodeCraft</span>
+            <span className="font-bold text-2xl text-primary">CodeCraft</span>
           </Link>
 
           <h1 className="text-3xl font-bold">Entre na sua conta</h1>
@@ -107,11 +114,7 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="btn btn-primary w-full"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
               <div className="flex items-center gap-2">
                 <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
