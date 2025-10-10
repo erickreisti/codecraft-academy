@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -22,7 +23,6 @@ export default function ForgotPasswordPage() {
     setSuccess(false);
 
     try {
-      // ✅ CORREÇÃO: Usar a URL correta para reset de password
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
       });
@@ -52,13 +52,13 @@ export default function ForgotPasswordPage() {
         {/* Cabeçalho */}
         <div className="text-center">
           <Link href="/" className="inline-flex items-center space-x-2 mb-8">
-            <div className="h-10 w-10 gradient-bg rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">C</span>
+            <div className="h-12 w-12 gradient-bg rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-xl">C</span>
             </div>
-            <span className="font-bold text-2xl gradient-text">CodeCraft</span>
+            <span className="font-bold text-3xl gradient-text">CodeCraft</span>
           </Link>
 
-          <h1 className="text-3xl font-bold">Redefinir Senha</h1>
+          <h1 className="text-3xl font-bold gradient-text">Redefinir Senha</h1>
           <p className="text-muted-foreground mt-2">
             Enviaremos um link para criar uma nova senha
           </p>
@@ -70,7 +70,10 @@ export default function ForgotPasswordPage() {
             {/* EXIBIÇÃO DE ERROS */}
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
+                <div className="flex items-center gap-2">
+                  <span>❌</span>
+                  <span>{error}</span>
+                </div>
               </div>
             )}
 
@@ -84,7 +87,9 @@ export default function ForgotPasswordPage() {
 
             {/* CAMPO EMAIL */}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-foreground font-medium">
+                Email
+              </Label>
               <Input
                 id="email"
                 type="email"
@@ -93,22 +98,26 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
+                className="border-border focus:border-primary transition-colors"
               />
             </div>
 
             {/* BOTÃO DE ENVIO */}
             <Button
               type="submit"
-              className="btn btn-primary w-full"
+              className="w-full gradient-bg hover:opacity-90 text-white font-semibold py-2.5 shadow-lg hover:shadow-xl transition-all duration-200 border-0"
               disabled={loading}
             >
               {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center gap-2 justify-center">
+                  <Spinner
+                    size="sm"
+                    className="border-white border-t-transparent"
+                  />
                   Enviando...
                 </div>
               ) : (
-                "Enviar Link de Redefinição"
+                "📧 Enviar Link de Redefinição"
               )}
             </Button>
           </form>
@@ -141,18 +150,27 @@ export default function ForgotPasswordPage() {
 
         {/* LINKS DE NAVEGAÇÃO */}
         <div className="text-center space-y-4">
-          <Link href="/login" className="block text-primary hover:underline">
+          <Link
+            href="/login"
+            className="block text-primary hover:text-primary/80 font-medium transition-colors"
+          >
             ← Voltar para o login
           </Link>
 
           {!success && (
             <Link
               href="/register"
-              className="block text-muted-foreground hover:underline text-sm"
+              className="block text-muted-foreground hover:text-foreground transition-colors text-sm"
             >
               Não tem conta? Cadastre-se
             </Link>
           )}
+        </div>
+
+        {/* Decoração visual */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl"></div>
         </div>
       </div>
     </div>

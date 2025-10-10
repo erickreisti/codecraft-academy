@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null);
@@ -70,8 +71,8 @@ export default function AdminPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4">Verificando acesso administrativo...</p>
+          <Spinner size="lg" className="mx-auto mb-4" />
+          <p>Verificando acesso administrativo...</p>
         </div>
       </div>
     );

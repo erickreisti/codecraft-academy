@@ -1,4 +1,4 @@
-// app/dashboard/profile/page.tsx - VERSÃO SEM MENSAGEM DE SUCESSO EXTRA
+// app/dashboard/profile/page.tsx - VERSÃO ATUALIZADA
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,8 +16,9 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { updateProfile } from "@/app/actions/profile-actions";
+import { updateProfile, getProfile } from "@/app/actions/profile-actions";
 import { Session } from "@supabase/supabase-js";
+import { Spinner } from "@/components/ui/spinner";
 
 // ✅ INTERFACES DE TIPAGEM
 interface UserProfile {
@@ -25,6 +26,7 @@ interface UserProfile {
   full_name?: string;
   bio?: string;
   website?: string;
+  role?: string;
   created_at: string;
   updated_at: string;
 }
@@ -35,7 +37,6 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  // REMOVIDO: const [success, setSuccess] = useState(false); // Não é mais necessário
 
   // 🔍 BUSCAR SESSÃO E DADOS DO USUÁRIO
   useEffect(() => {
@@ -58,14 +59,23 @@ export default function ProfilePage() {
 
         setSession(currentSession);
 
-        // Buscar perfil
-        const { data: profileData } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", currentSession.user.id)
-          .single();
+        // ✅ USAR SERVER ACTION PARA BUSCAR PERFIL (funciona para todos)
+        const result = await getProfile(currentSession.user.id);
 
-        setProfile(profileData);
+        if (result.success) {
+          setProfile(result.profile);
+          console.log("✅ Perfil carregado via Server Action:", result.profile);
+        } else {
+          // Fallback: tentar com cliente normal
+          console.log("🔄 Tentando fallback com cliente normal...");
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", currentSession.user.id)
+            .single();
+
+          setProfile(profileData);
+        }
       } catch (error) {
         console.error("💥 Erro ao buscar dados:", error);
         toast.error("Erro ao carregar perfil");
@@ -77,8 +87,6 @@ export default function ProfilePage() {
     fetchUserData();
   }, [router]);
 
-  // REMOVIDO: useEffect para verificar success da URL, pois não é mais usado
-
   // Calcular tempo como membro
   const memberSince = session ? new Date(session.user.created_at) : new Date();
   const now = new Date();
@@ -86,54 +94,61 @@ export default function ProfilePage() {
     (now.getTime() - memberSince.getTime()) / (1000 * 60 * 60 * 24 * 30)
   );
 
+  // ✅ FUNÇÃO PARA SALVAR PERFIL (UNIVERSAL)
+  const handleSaveProfile = async (formData: FormData) => {
+    if (!session) {
+      toast.error("Sessão expirada. Faça login novamente.");
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      // ✅ USAR SERVER ACTION UNIVERSAL
+      const result = await updateProfile(session.user.id, formData);
+
+      if (result.success) {
+        toast.success("Perfil atualizado com sucesso!", {
+          description: "Suas informações foram salvas.",
+        });
+
+        // Atualizar estado local com os dados retornados
+        if (result.profile) {
+          setProfile(result.profile);
+        }
+
+        // Atualizar user_metadata no Supabase Auth
+        if (formData.get("full_name")) {
+          const { error } = await supabase.auth.updateUser({
+            data: { full_name: formData.get("full_name") as string },
+          });
+          if (error) {
+            console.warn("⚠️ Não foi possível atualizar user_metadata:", error);
+          }
+        }
+      } else {
+        toast.error("Erro ao salvar perfil", {
+          description: result.error,
+        });
+      }
+    } catch (error) {
+      console.error("💥 Erro inesperado:", error);
+      toast.error("Erro inesperado ao salvar perfil");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="text-6xl animate-spin">🔄</div>
+          <Spinner size="lg" className="mx-auto" />
           <h2 className="text-xl font-bold">Carregando perfil...</h2>
         </div>
       </div>
     );
   }
-
-  // ✅ NOVA FUNÇÃO PARA SALVAR
-  const handleSaveProfile = async (formData: FormData) => {
-    if (!session) return;
-
-    setSaving(true);
-
-    try {
-      const result = await updateProfile(session.user.id, formData);
-
-      if (result.success) {
-        // REMOVIDO: setSuccess(true);
-        toast.success("Perfil atualizado!", {
-          description: "Suas alterações foram salvas com sucesso.",
-        });
-
-        // Atualizar dados locais
-        const { data: updatedProfile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", session.user.id)
-          .single();
-
-        setProfile(updatedProfile);
-
-        // REMOVIDO: setTimeout para esconder mensagem de sucesso, pois não existe mais
-      } else {
-        toast.error("Erro ao salvar", {
-          description: result.error,
-        });
-      }
-    } catch (error) {
-      toast.error("Erro inesperado");
-      console.error("Erro ao salvar perfil:", error);
-    } finally {
-      setSaving(false);
-    }
-  };
 
   if (!session) {
     return (
@@ -181,7 +196,6 @@ export default function ProfilePage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* FORMULÁRIO */}
                 <form action={handleSaveProfile} className="space-y-6">
                   {/* Email (somente leitura) */}
                   <div className="space-y-2">
@@ -216,9 +230,6 @@ export default function ProfilePage() {
                       defaultValue={profile?.full_name || ""}
                       placeholder="Como você gostaria de ser chamado?"
                     />
-                    <p className="text-sm text-muted-foreground">
-                      Este nome aparecerá no seu perfil público
-                    </p>
                   </div>
 
                   {/* Bio */}
@@ -252,7 +263,7 @@ export default function ProfilePage() {
                       name="website"
                       type="url"
                       defaultValue={profile?.website || ""}
-                      placeholder="https://seusite.com  "
+                      placeholder="https://seusite.com"
                     />
                   </div>
 
@@ -262,8 +273,8 @@ export default function ProfilePage() {
                     disabled={saving}
                   >
                     {saving ? (
-                      <div className="flex items-center gap-2">
-                        <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="flex items-center gap-2 justify-center">
+                        <Spinner size="sm" />
                         Salvando...
                       </div>
                     ) : (
@@ -288,6 +299,23 @@ export default function ProfilePage() {
                   <p className="text-sm font-medium">🆔 ID do Usuário</p>
                   <p className="text-sm text-muted-foreground font-mono bg-muted px-2 py-1 rounded mt-1">
                     {session.user.id.substring(0, 8)}...
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium">👤 Tipo de Conta</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${
+                        profile?.role === "admin"
+                          ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                          : "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                      }`}
+                    >
+                      {profile?.role === "admin"
+                        ? "👑 Administrador"
+                        : "🎓 Aluno"}
+                    </span>
                   </p>
                 </div>
 
@@ -319,7 +347,6 @@ export default function ProfilePage() {
                 >
                   <Link href="/forgot-password">🔒 Alterar Senha</Link>
                 </Button>
-
                 <Button
                   variant="outline"
                   className="w-full justify-start"
@@ -327,6 +354,17 @@ export default function ProfilePage() {
                 >
                   <Link href="/dashboard">📚 Meus Cursos</Link>
                 </Button>
+
+                {/* Link para área admin se for admin */}
+                {profile?.role === "admin" && (
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start"
+                    asChild
+                  >
+                    <Link href="/admin">👑 Painel Administrativo</Link>
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>

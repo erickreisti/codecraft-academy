@@ -19,11 +19,11 @@ export default function Home() {
       <Header />
 
       {/* HERO SECTION - Layout profissional */}
-      <section className="section-py">
+      <section className="py-20">
         <div className="container-custom">
-          <div className="hero-grid">
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
             {/* COLUNA DE CONTEÚDO - Alinhada à esquerda */}
-            <div className="hero-content animate-fade-in-up">
+            <div className="flex-1 space-y-8 animate-fade-in-up">
               <div className="space-y-6">
                 {/* Título principal */}
                 <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
@@ -39,11 +39,14 @@ export default function Home() {
               </div>
 
               {/* BOTÕES - Grupo alinhado à esquerda */}
-              <div className="flex flex-col sm:flex-row gap-4 mt-8 items-start sm:items-center">
-                <Button className="btn btn-primary btn-lg">
+              <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                <Button className="gradient-bg hover:opacity-90 text-white font-semibold py-3 px-8 shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-lg">
                   🚀 Explorar Cursos
                 </Button>
-                <Button variant="outline" className="btn btn-secondary btn-lg">
+                <Button
+                  variant="outline"
+                  className="btn-secondary py-3 px-8 text-lg border-2"
+                >
                   👥 Ver Depoimentos
                 </Button>
               </div>
@@ -66,7 +69,7 @@ export default function Home() {
             </div>
 
             {/* COLUNA VISUAL - Centralizada */}
-            <div className="hero-visual animate-fade-in-up">
+            <div className="flex-1 flex justify-center animate-fade-in-up">
               <div className="relative w-full max-w-lg">
                 {/* Card principal com gradiente */}
                 <div className="gradient-bg rounded-2xl p-8 text-white shadow-2xl animate-float">
@@ -90,8 +93,14 @@ export default function Home() {
                 </div>
 
                 {/* Elementos decorativos */}
-                <div className="absolute -top-4 -left-4 w-24 h-24 bg-blue-200 dark:bg-blue-900 rounded-full mix-blend-multiply dark:mix-blend-screen opacity-70 animate-float animation-delay-2000"></div>
-                <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-200 dark:bg-purple-900 rounded-full mix-blend-multiply dark:mix-blend-screen opacity-70 animate-float animation-delay-3000"></div>
+                <div
+                  className="absolute -top-4 -left-4 w-24 h-24 bg-blue-200 dark:bg-blue-900 rounded-full mix-blend-multiply dark:mix-blend-screen opacity-70 animate-float"
+                  style={{ animationDelay: "2s" }}
+                ></div>
+                <div
+                  className="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-200 dark:bg-purple-900 rounded-full mix-blend-multiply dark:mix-blend-screen opacity-70 animate-float"
+                  style={{ animationDelay: "3s" }}
+                ></div>
               </div>
             </div>
           </div>
@@ -99,10 +108,10 @@ export default function Home() {
       </section>
 
       {/* FEATURES SECTION - Layout profissional */}
-      <section className="section-py bg-muted/30">
+      <section className="py-20 bg-muted/30">
         <div className="container-custom">
           {/* Cabeçalho centralizado */}
-          <div className="content-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-3xl mx-auto mb-16">
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
               Por que escolher a{" "}
               <span className="gradient-text">CodeCraft</span>?
@@ -114,7 +123,7 @@ export default function Home() {
           </div>
 
           {/* Grid de features */}
-          <div className="features-grid">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <Card className="feature-card group">
               <CardHeader className="text-center pb-6">
@@ -172,9 +181,9 @@ export default function Home() {
       </section>
 
       {/* CTA SECTION - Centralizada */}
-      <section className="section-py">
+      <section className="py-20">
         <div className="container-custom">
-          <div className="content-center max-w-2xl mx-auto space-y-8">
+          <div className="text-center max-w-2xl mx-auto space-y-8">
             <div className="space-y-4">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Pronto para transformar sua carreira?
@@ -186,10 +195,13 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="btn btn-primary btn-xl">
+              <Button className="gradient-bg hover:opacity-90 text-white font-semibold py-4 px-8 shadow-lg hover:shadow-xl transition-all duration-200 border-0 text-lg">
                 🎓 Começar Agora Gratuitamente
               </Button>
-              <Button variant="outline" className="btn btn-secondary btn-lg">
+              <Button
+                variant="outline"
+                className="btn-secondary py-4 px-8 text-lg border-2"
+              >
                 📞 Falar com Consultor
               </Button>
             </div>

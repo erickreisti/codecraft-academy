@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -16,10 +17,9 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
-  const [tokenValid, setTokenValid] = useState(true); // ✅ Assume válido inicialmente
+  const [tokenValid, setTokenValid] = useState(true);
   const router = useRouter();
 
-  // ✅ VERIFICAR SE O USUÁRIO ESTÁ AUTENTICADO (token já foi processado)
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
@@ -52,7 +52,6 @@ export default function ResetPasswordPage() {
     setLoading(true);
     setError("");
 
-    // Validações
     if (password !== confirmPassword) {
       setError("As senhas não coincidem");
       setLoading(false);
@@ -68,7 +67,6 @@ export default function ResetPasswordPage() {
     try {
       console.log("🔄 Atualizando senha...");
 
-      // Atualizar a senha
       const { error } = await supabase.auth.updateUser({
         password: password,
       });
@@ -86,7 +84,6 @@ export default function ResetPasswordPage() {
           description: "Redirecionando para o login...",
         });
 
-        // Redirecionar para login após 3 segundos
         setTimeout(() => {
           router.push("/login");
         }, 3000);
@@ -105,12 +102,17 @@ export default function ResetPasswordPage() {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="max-w-md w-full text-center space-y-6">
           <div className="text-6xl">❌</div>
-          <h1 className="text-2xl font-bold">Link inválido ou expirado</h1>
+          <h1 className="text-2xl font-bold gradient-text">
+            Link inválido ou expirado
+          </h1>
           <p className="text-muted-foreground">
             {error || "Este link de redefinição é inválido ou expirou."}
           </p>
           <div className="space-y-3">
-            <Button asChild className="btn btn-primary w-full">
+            <Button
+              asChild
+              className="w-full gradient-bg hover:opacity-90 text-white font-semibold py-2.5 shadow-lg hover:shadow-xl transition-all duration-200 border-0"
+            >
               <Link href="/forgot-password">Solicitar novo link</Link>
             </Button>
             <Button asChild variant="outline" className="w-full">
@@ -125,8 +127,16 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8">
+        {/* Cabeçalho */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Criar Nova Senha</h1>
+          <Link href="/" className="inline-flex items-center space-x-2 mb-8">
+            <div className="h-12 w-12 gradient-bg rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-xl">C</span>
+            </div>
+            <span className="font-bold text-3xl gradient-text">CodeCraft</span>
+          </Link>
+
+          <h1 className="text-3xl font-bold gradient-text">Criar Nova Senha</h1>
           <p className="text-muted-foreground mt-2">
             Digite sua nova senha abaixo
           </p>
@@ -154,7 +164,9 @@ export default function ResetPasswordPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="password">Nova Senha</Label>
+              <Label htmlFor="password" className="text-foreground font-medium">
+                Nova Senha
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -164,11 +176,17 @@ export default function ResetPasswordPage() {
                 required
                 minLength={6}
                 disabled={loading}
+                className="border-border focus:border-primary transition-colors"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirmar Nova Senha</Label>
+              <Label
+                htmlFor="confirmPassword"
+                className="text-foreground font-medium"
+              >
+                Confirmar Nova Senha
+              </Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -177,25 +195,35 @@ export default function ResetPasswordPage() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 disabled={loading}
+                className="border-border focus:border-primary transition-colors"
               />
             </div>
 
             <Button
               type="submit"
-              className="btn btn-primary w-full"
+              className="w-full gradient-bg hover:opacity-90 text-white font-semibold py-2.5 shadow-lg hover:shadow-xl transition-all duration-200 border-0"
               disabled={loading}
             >
               {loading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center gap-2 justify-center">
+                  <Spinner
+                    size="sm"
+                    className="border-white border-t-transparent"
+                  />
                   Redefinindo...
                 </div>
               ) : (
-                "Redefinir Senha"
+                "🔐 Redefinir Senha"
               )}
             </Button>
           </form>
         )}
+
+        {/* Decoração visual */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/10 rounded-full blur-3xl"></div>
+        </div>
       </div>
     </div>
   );

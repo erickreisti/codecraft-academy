@@ -8,6 +8,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 
 interface Course {
   id: string;
@@ -98,8 +99,8 @@ export default function AdminCoursesPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4">Verificando acesso...</p>
+          <Spinner size="lg" className="mx-auto mb-4" />
+          <p>Verificando acesso...</p>
         </div>
       </div>
     );
@@ -135,8 +136,8 @@ export default function AdminCoursesPage() {
           <CardContent>
             {coursesLoading ? (
               <div className="text-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                <p className="mt-2">Carregando cursos...</p>
+                <Spinner size="md" className="mx-auto mb-2" />
+                <p className="text-muted-foreground">Carregando cursos...</p>
               </div>
             ) : (
               <div className="overflow-x-auto">

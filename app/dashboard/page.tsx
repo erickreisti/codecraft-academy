@@ -12,6 +12,7 @@ import {
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import { Spinner } from "@/components/ui/spinner";
 
 // INTERFACES PARA TIPAGEM FORTE
 interface Course {
@@ -137,9 +138,9 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="text-6xl animate-pulse">⏳</div>
-          <h2 className="text-2xl font-bold">Carregando...</h2>
-          <p className="text-muted-foreground">Preparando seu dashboard</p>
+          <Spinner size="lg" className="mx-auto" />
+          <h2 className="text-2xl font-bold">Carregando dashboard...</h2>
+          <p className="text-muted-foreground">Preparando seus dados</p>
         </div>
       </div>
     );
