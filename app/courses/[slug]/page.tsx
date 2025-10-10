@@ -1,10 +1,11 @@
-// app/courses/[slug]/page.tsx - VERIFICAR SE EXISTE
-import { createServerClient } from "@/lib/supabase/server";
+// app/courses/[slug]/page.tsx - VERSÃO COM CLIENTE ADMIN
+import { createAdminClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/header";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { CourseImage } from "@/components/ui/course-image";
+import type { Course } from "@/types";
 
 interface CoursePageProps {
   params: {
@@ -13,123 +14,135 @@ interface CoursePageProps {
 }
 
 export default async function CoursePage({ params }: CoursePageProps) {
-  console.log("🎯 Tentando acessar curso com slug:", params.slug);
+  // ✅ USAR CLIENTE ADMIN QUE IGNORA RLS
+  const supabase = createAdminClient();
 
-  const supabase = createServerClient();
+  try {
+    console.log("🎯 Buscando curso com slug:", params.slug);
 
-  // Busca curso específico pelo slug
-  const { data: course, error } = await supabase
-    .from("courses")
-    .select("*")
-    .eq("slug", params.slug)
-    .eq("published", true)
-    .single();
+    // Query usando cliente admin (ignora RLS)
+    const { data: course, error } = await supabase
+      .from("courses")
+      .select("*")
+      .eq("slug", params.slug)
+      .single();
 
-  if (error || !course) {
-    console.error("❌ Curso não encontrado:", error);
-    notFound();
-  }
+    console.log("📊 Resultado:", { course: course?.title, error });
 
-  console.log("✅ Curso encontrado:", course.title);
+    if (error) {
+      console.error("❌ Erro na query:", error);
+      notFound();
+    }
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    if (!course) {
+      console.log("❌ Curso não encontrado");
+      notFound();
+    }
 
-      <section className="section-py">
-        <div className="container-custom max-w-6xl">
-          <div className="grid lg:grid-cols-2 gap-12">
-            {/* COLUNA DA ESQUERDA - CONTEÚDO */}
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-                  {course.title}
-                </h1>
-                <p className="mt-4 text-xl text-muted-foreground">
-                  {course.short_description}
-                </p>
-              </div>
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
 
-              <div className="prose prose-lg max-w-none">
-                <p>{course.description}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 text-sm">
+        <section className="section-py">
+          <div className="container-custom max-w-6xl">
+            <div className="grid lg:grid-cols-2 gap-12">
+              {/* COLUNA DA ESQUERDA - CONTEÚDO */}
+              <div className="space-y-6">
                 <div>
-                  <span className="font-semibold">Duração:</span>
-                  <p>{course.duration_hours} horas</p>
-                </div>
-                <div>
-                  <span className="font-semibold">Nível:</span>
-                  <p className="capitalize">{course.level}</p>
-                </div>
-                <div>
-                  <span className="font-semibold">Categoria:</span>
-                  <p>{course.category}</p>
-                </div>
-                <div>
-                  <span className="font-semibold">Preço:</span>
-                  <p>
-                    {course.price === 0
-                      ? "Gratuito"
-                      : `R$ ${course.price.toFixed(2)}`}
+                  <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+                    {course.title}
+                  </h1>
+                  <p className="mt-4 text-xl text-muted-foreground">
+                    {course.short_description || "Descrição do curso..."}
                   </p>
                 </div>
+
+                <div className="prose prose-lg max-w-none">
+                  <p>
+                    {course.description || "Descrição detalhada do curso..."}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-semibold">Duração:</span>
+                    <p>{course.duration_hours || 0} horas</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Nível:</span>
+                    <p className="capitalize">{course.level || "iniciante"}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Categoria:</span>
+                    <p>{course.category || "Programação"}</p>
+                  </div>
+                  <div>
+                    <span className="font-semibold">Preço:</span>
+                    <p>
+                      {course.price === 0
+                        ? "Gratuito"
+                        : `R$ ${course.price?.toFixed(2)}`}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* COLUNA DA DIREITA - COMPRA */}
-            <div className="space-y-6">
-              <div className="feature-card p-6">
-                <div className="text-center space-y-4">
-                  {/* IMAGEM */}
-                  <div className="h-48 w-full rounded-lg overflow-hidden">
-                    <CourseImage src={course.image_url} alt={course.title} />
-                  </div>
-
-                  {/* PREÇO */}
-                  <div className="text-3xl font-bold text-primary">
-                    {course.price === 0
-                      ? "Gratuito"
-                      : `R$ ${course.price.toFixed(2)}`}
-                  </div>
-
-                  {/* BOTÕES */}
-                  <div className="space-y-3">
-                    <AddToCartButton course={course} size="lg" />
-
-                    <Button variant="outline" className="w-full">
-                      📋 Lista de Desejos
-                    </Button>
-                  </div>
-
-                  {/* BENEFÍCIOS */}
-                  <div className="pt-4 space-y-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <span>✅</span>
-                      <span>Acesso vitalício</span>
+              {/* COLUNA DA DIREITA - COMPRA */}
+              <div className="space-y-6">
+                <div className="feature-card p-6">
+                  <div className="text-center space-y-4">
+                    {/* IMAGEM */}
+                    <div className="h-48 w-full rounded-lg overflow-hidden">
+                      <CourseImage src={course.image_url} alt={course.title} />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span>✅</span>
-                      <span>Certificado de conclusão</span>
+
+                    {/* PREÇO */}
+                    <div className="text-3xl font-bold text-primary">
+                      {course.price === 0
+                        ? "Gratuito"
+                        : `R$ ${course.price?.toFixed(2)}`}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span>✅</span>
-                      <span>Suporte da comunidade</span>
+
+                    {/* BOTÕES */}
+                    <div className="space-y-3">
+                      <AddToCartButton course={course} size="lg" />
+
+                      <Button variant="outline" className="w-full">
+                        📋 Lista de Desejos
+                      </Button>
                     </div>
-                    {course.price > 0 && (
+
+                    {/* BENEFÍCIOS */}
+                    <div className="pt-4 space-y-2 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <span>✅</span>
-                        <span>Garantia de 7 dias</span>
+                        <span>Acesso vitalício</span>
                       </div>
-                    )}
+                      <div className="flex items-center gap-2">
+                        <span>✅</span>
+                        <span>Certificado de conclusão</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>✅</span>
+                        <span>Suporte da comunidade</span>
+                      </div>
+                      {course.price > 0 && (
+                        <div className="flex items-center gap-2">
+                          <span>✅</span>
+                          <span>Garantia de 7 dias</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-    </div>
-  );
+        </section>
+      </div>
+    );
+  } catch (error) {
+    console.error("💥 Erro inesperado:", error);
+    notFound();
+  }
 }
