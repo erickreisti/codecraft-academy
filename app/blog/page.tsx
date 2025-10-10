@@ -43,7 +43,6 @@ export default async function BlogPage() {
                     <BlogImage
                       src={post.image_url} // Se tiver campo image_url nos posts
                       alt={post.title}
-                      className="rounded-t-lg"
                     />
                     {/* Overlay para melhor contraste */}
                     <div className="absolute inset-0 bg-black/10 hover:bg-black/20 transition-colors"></div>

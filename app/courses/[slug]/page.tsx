@@ -1,22 +1,10 @@
-// app/courses/[slug]/page.tsx
-
-/**
- * PÁGINA DE DETALHES DO CURSO
- *
- * Página individual de cada curso com:
- * - Informações completas do curso
- * - Seção de compra/inscrição
- * - Pré-requisitos e conteúdo
- * - Integração com carrinho
- *
- * Utiliza dynamic routes do Next.js com [slug]
- */
-
+// app/courses/[slug]/page.tsx - VERIFICAR SE EXISTE
 import { createServerClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/header";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
+import { CourseImage } from "@/components/ui/course-image";
 
 interface CoursePageProps {
   params: {
@@ -25,7 +13,8 @@ interface CoursePageProps {
 }
 
 export default async function CoursePage({ params }: CoursePageProps) {
-  // Cria cliente do Supabase
+  console.log("🎯 Tentando acessar curso com slug:", params.slug);
+
   const supabase = createServerClient();
 
   // Busca curso específico pelo slug
@@ -33,11 +22,15 @@ export default async function CoursePage({ params }: CoursePageProps) {
     .from("courses")
     .select("*")
     .eq("slug", params.slug)
-    .eq("published", true) // Apenas se estiver publicado
-    .single(); // Espera um único resultado
+    .eq("published", true)
+    .single();
 
-  // Se não encontrar curso, mostra página 404
-  if (error || !course) notFound();
+  if (error || !course) {
+    console.error("❌ Curso não encontrado:", error);
+    notFound();
+  }
+
+  console.log("✅ Curso encontrado:", course.title);
 
   return (
     <div className="min-h-screen bg-background">
@@ -45,11 +38,9 @@ export default async function CoursePage({ params }: CoursePageProps) {
 
       <section className="section-py">
         <div className="container-custom max-w-6xl">
-          {/* LAYOUT EM DUAS COLUNAS */}
           <div className="grid lg:grid-cols-2 gap-12">
-            {/* COLUNA DA ESQUERDA - CONTEÚDO DO CURSO */}
+            {/* COLUNA DA ESQUERDA - CONTEÚDO */}
             <div className="space-y-6">
-              {/* CABEÇALHO */}
               <div>
                 <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
                   {course.title}
@@ -59,12 +50,10 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 </p>
               </div>
 
-              {/* DESCRIÇÃO COMPLETA */}
               <div className="prose prose-lg max-w-none">
                 <p>{course.description}</p>
               </div>
 
-              {/* METADADOS DO CURSO */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="font-semibold">Duração:</span>
@@ -72,44 +61,49 @@ export default async function CoursePage({ params }: CoursePageProps) {
                 </div>
                 <div>
                   <span className="font-semibold">Nível:</span>
-                  <p>{course.level}</p>
+                  <p className="capitalize">{course.level}</p>
                 </div>
                 <div>
                   <span className="font-semibold">Categoria:</span>
                   <p>{course.category}</p>
                 </div>
                 <div>
-                  <span className="font-semibold">Tipo:</span>
-                  <p>{course.price === 0 ? "Gratuito" : "Premium"}</p>
+                  <span className="font-semibold">Preço:</span>
+                  <p>
+                    {course.price === 0
+                      ? "Gratuito"
+                      : `R$ ${course.price.toFixed(2)}`}
+                  </p>
                 </div>
               </div>
             </div>
 
-            {/* COLUNA DA DIREITA - AÇÕES DE COMPRA */}
+            {/* COLUNA DA DIREITA - COMPRA */}
             <div className="space-y-6">
-              {/* CARD DE COMPRA */}
               <div className="feature-card p-6">
                 <div className="text-center space-y-4">
-                  {/* ÍCONE */}
-                  <div className="text-4xl">🎯</div>
+                  {/* IMAGEM */}
+                  <div className="h-48 w-full rounded-lg overflow-hidden">
+                    <CourseImage src={course.image_url} alt={course.title} />
+                  </div>
 
                   {/* PREÇO */}
                   <div className="text-3xl font-bold text-primary">
-                    {course.price === 0 ? "Gratuito" : `R$ ${course.price}`}
+                    {course.price === 0
+                      ? "Gratuito"
+                      : `R$ ${course.price.toFixed(2)}`}
                   </div>
 
-                  {/* BOTÕES DE AÇÃO */}
+                  {/* BOTÕES */}
                   <div className="space-y-3">
-                    {/* BOTÃO PRINCIPAL - ADICIONAR AO CARRINHO OU ACESSAR GRATUITO */}
                     <AddToCartButton course={course} size="lg" />
 
-                    {/* BOTÃO SECUNDÁRIO - LISTA DE DESEJOS */}
                     <Button variant="outline" className="w-full">
                       📋 Lista de Desejos
                     </Button>
                   </div>
 
-                  {/* BENEFÍCIOS INCLUSOS */}
+                  {/* BENEFÍCIOS */}
                   <div className="pt-4 space-y-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-2">
                       <span>✅</span>
@@ -117,26 +111,20 @@ export default async function CoursePage({ params }: CoursePageProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span>✅</span>
-                      <span>Certificado</span>
+                      <span>Certificado de conclusão</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span>✅</span>
-                      <span>Suporte</span>
+                      <span>Suporte da comunidade</span>
                     </div>
                     {course.price > 0 && (
                       <div className="flex items-center gap-2">
                         <span>✅</span>
-                        <span>Garantia 7 dias</span>
+                        <span>Garantia de 7 dias</span>
                       </div>
                     )}
                   </div>
                 </div>
-              </div>
-
-              {/* INFORMAÇÕES ADICIONAIS */}
-              <div className="text-center text-sm text-muted-foreground">
-                <p>🎁 30 dias de garantia incondicional</p>
-                <p>💳 Parcele em até 12x no cartão</p>
               </div>
             </div>
           </div>

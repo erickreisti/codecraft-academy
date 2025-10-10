@@ -41,11 +41,7 @@ export default async function CoursesPage() {
                 <CardHeader className="pb-4">
                   {/* IMAGEM/THUMBNAIL DO CURSO */}
                   <div className="h-48 rounded-lg mb-4 relative overflow-hidden">
-                    <CourseImage
-                      src={course.image_url}
-                      alt={course.title}
-                      className="rounded-lg"
-                    />
+                    <CourseImage src={course.image_url} alt={course.title} />
                     {/* OVERLAY PARA MELHOR CONTRASTE */}
                     <div className="absolute inset-0 bg-black/10 hover:bg-black/20 transition-colors"></div>
                   </div>
