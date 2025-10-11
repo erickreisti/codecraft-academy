@@ -64,6 +64,12 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+    if (!passwordRegex.test(password)) {
+      setError("A senha deve conter letras maiúsculas, minúsculas e números");
+      return;
+    }
+
     try {
       console.log("🔄 Atualizando senha...");
 

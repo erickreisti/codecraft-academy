@@ -1,4 +1,4 @@
-// app/admin/posts/page.tsx - VERSÃO MELHORADA
+// app/admin/posts/page.tsx - VERSÃO COMPLETA CORRIGIDA
 "use client";
 
 import { useState, useEffect } from "react";
@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 interface Post {
   id: string;
@@ -39,7 +40,6 @@ interface Post {
   updated_at: string;
   image_url?: string;
   author?: {
-    email: string;
     profiles?: {
       full_name: string;
     };
@@ -112,25 +112,69 @@ export default function AdminPostsPage() {
   const loadPosts = async () => {
     try {
       setPostsLoading(true);
+      console.log("🔄 Buscando posts do Supabase...");
+
       const { data: posts, error } = await supabase
         .from("posts")
-        .select(
-          `
-          *,
-          author:profiles(full_name)
-        `
-        )
+        .select("*")
         .order("created_at", { ascending: false });
 
+      console.log("📊 Resultado da query posts:", { posts, error });
+
       if (error) {
-        console.error("Erro ao buscar posts:", error);
+        console.error("❌ Erro ao buscar posts:", error);
+        toast.error("Erro ao carregar posts");
         return;
       }
 
-      setPosts(posts || []);
-      console.log(`📝 ${posts?.length || 0} posts carregados`);
+      // Buscar informações dos autores separadamente
+      if (posts && posts.length > 0) {
+        const authorIds = posts.map((post) => post.author_id).filter(Boolean);
+
+        if (authorIds.length > 0) {
+          const { data: authors, error: authorsError } = await supabase
+            .from("profiles")
+            .select("id, full_name")
+            .in("id", authorIds);
+
+          console.log("👥 Autores encontrados:", authors);
+
+          if (authorsError) {
+            console.error("❌ Erro ao buscar autores:", authorsError);
+          }
+
+          // Combinar posts com informações dos autores
+          const postsWithAuthors = posts.map((post) => {
+            const authorProfile = authors?.find(
+              (author) => author.id === post.author_id
+            );
+            return {
+              ...post,
+              author: authorProfile
+                ? {
+                    profiles: {
+                      full_name: authorProfile.full_name,
+                    },
+                  }
+                : null,
+            };
+          });
+
+          setPosts(postsWithAuthors);
+          console.log(
+            `✅ ${postsWithAuthors.length} posts processados com autores`
+          );
+        } else {
+          setPosts(posts);
+          console.log("ℹ️ Posts carregados sem autores (author_ids vazios)");
+        }
+      } else {
+        setPosts([]);
+        console.log("ℹ️ Nenhum post encontrado");
+      }
     } catch (error) {
-      console.error("Erro ao carregar posts:", error);
+      console.error("💥 Erro inesperado:", error);
+      toast.error("Erro inesperado ao carregar posts");
     } finally {
       setPostsLoading(false);
     }
@@ -148,6 +192,7 @@ export default function AdminPostsPage() {
 
       if (error) {
         console.error("Erro ao alterar status do post:", error);
+        toast.error("Erro ao alterar status do post");
         return;
       }
 
@@ -164,11 +209,15 @@ export default function AdminPostsPage() {
         )
       );
 
+      toast.success(
+        `Post ${!currentStatus ? "publicado" : "despublicado"} com sucesso`
+      );
       console.log(
         `✅ Post ${!currentStatus ? "publicado" : "despublicado"} com sucesso`
       );
     } catch (error) {
       console.error("Erro ao alterar publicação:", error);
+      toast.error("Erro ao alterar publicação");
     }
   };
 
@@ -182,14 +231,17 @@ export default function AdminPostsPage() {
 
       if (error) {
         console.error("Erro ao excluir post:", error);
+        toast.error("Erro ao excluir post");
         return;
       }
 
       // Remover da lista local
       setPosts(posts.filter((post) => post.id !== postId));
+      toast.success("Post excluído com sucesso");
       console.log("✅ Post excluído com sucesso");
     } catch (error) {
       console.error("Erro ao excluir post:", error);
+      toast.error("Erro ao excluir post");
     }
   };
 
@@ -427,9 +479,7 @@ export default function AdminPostsPage() {
                           <div className="flex items-center gap-1">
                             <User className="h-3 w-3" />
                             <span>
-                              {(post as any).author?.profiles?.full_name ||
-                                (post as any).author?.email ||
-                                "Autor"}
+                              {post.author?.profiles?.full_name || "Autor"}
                             </span>
                           </div>
                           <span>•</span>

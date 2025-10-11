@@ -25,6 +25,7 @@ import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { supabase } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
+import { UserAvatar } from "@/components/user/user-avatar";
 import {
   ShoppingCart,
   User as UserIcon,
@@ -320,8 +321,7 @@ export function Header() {
 
           {/* CONDICIONAL: Mostra estado baseado no login */}
           {user ? (
-            // USUÁRIO LOGADO: Mostra nome completo (ou parte do email), link para dashboard e botão sair
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               {/* Link para o Dashboard */}
               <Link href="/dashboard" className="hidden sm:inline">
                 <Button
@@ -333,10 +333,10 @@ export function Header() {
                   Dashboard
                 </Button>
               </Link>
-              {/* Nome do Usuário */}
-              <span className="text-sm text-muted-foreground hidden sm:inline">
-                Olá, {displayName}
-              </span>
+
+              {/* Avatar do Usuário */}
+              <UserAvatar size="md" showName={true} />
+
               {/* Botão Sair */}
               <Button
                 variant="outline"

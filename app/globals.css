@@ -300,4 +300,14 @@ body {
   }
 }
 
+/* Melhorias para o avatar */
+.user-avatar {
+  transition: all 0.2s ease-in-out;
+}
+
+.user-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 /* Remove a parte duplicada no final do arquivo */
