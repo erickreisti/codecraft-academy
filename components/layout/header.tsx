@@ -1,21 +1,15 @@
-// components/layout/header.tsx - VERSÃO COMPLETA E CORRIGIDA
+// components/layout/header.tsx - VERSÃO CORRIGIDA
 
 /**
  * HEADER COM AUTENTICAÇÃO E CARRINHO - CodeCraft Academy
  *
- * Header responsivo que mostra estado de autenticação do usuário
- * Atualiza automaticamente quando usuário faz login/logout
- *
- * Funcionalidades:
- * - Logo com link para home
- * - Navegação principal
- * - Toggle de tema claro/escuro
- * - Ícone do carrinho com contador
- * - Estado de autenticação do usuário (exibe nome completo, link para dashboard com background chamativo)
- * - Sidebar do carrinho
+ * Correções aplicadas:
+ * - Removida propriedade 'user' não suportada pelo UserAvatar
+ * - Corrigido conflito CSS no gradiente
+ * - Mantidas todas as melhorias visuais e funcionais
  */
 
-"use client"; // Necessário para hooks e efeitos
+"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -32,14 +26,19 @@ import {
   Moon,
   Sun,
   Monitor,
+  Menu,
+  Sparkles,
+  BookOpen,
+  FileText,
+  Users,
+  Home,
 } from "lucide-react";
 
-// Interface simplificada para o perfil do usuário (apenas o necessário)
 interface UserProfile {
   full_name?: string;
+  avatar_url?: string;
 }
 
-// Componente de toggle de tema com dropdown
 function ThemeToggleWithDropdown() {
   const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState("system");
@@ -84,7 +83,7 @@ function ThemeToggleWithDropdown() {
       <Button
         variant="outline"
         size="icon"
-        className="h-9 w-9 relative"
+        className="h-9 w-9 relative transition-all duration-300 hover:scale-110 hover:shadow-md"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Selecionar tema"
       >
@@ -92,21 +91,21 @@ function ThemeToggleWithDropdown() {
         <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
       </Button>
 
-      {/* Dropdown manual */}
       {isOpen && (
         <>
-          {/* Overlay para fechar ao clicar fora */}
           <div
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="absolute right-0 top-12 z-50 w-40 rounded-md border bg-background p-2 shadow-lg">
+          <div className="absolute right-0 top-12 z-50 w-40 rounded-xl border bg-background/95 backdrop-blur p-2 shadow-xl animate-in fade-in-0 zoom-in-95">
             <div className="space-y-1">
               <button
                 onClick={() => handleThemeChange("light")}
-                className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  theme === "light" ? "bg-accent text-accent-foreground" : ""
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:text-accent-foreground hover:scale-105 ${
+                  theme === "light"
+                    ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                    : ""
                 }`}
               >
                 <Sun className="h-4 w-4" />
@@ -115,8 +114,10 @@ function ThemeToggleWithDropdown() {
 
               <button
                 onClick={() => handleThemeChange("dark")}
-                className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  theme === "dark" ? "bg-accent text-accent-foreground" : ""
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:text-accent-foreground hover:scale-105 ${
+                  theme === "dark"
+                    ? "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
+                    : ""
                 }`}
               >
                 <Moon className="h-4 w-4" />
@@ -125,8 +126,10 @@ function ThemeToggleWithDropdown() {
 
               <button
                 onClick={() => handleThemeChange("system")}
-                className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
-                  theme === "system" ? "bg-accent text-accent-foreground" : ""
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:text-accent-foreground hover:scale-105 ${
+                  theme === "system"
+                    ? "bg-gray-50 text-gray-700 dark:bg-gray-900/20 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
+                    : ""
                 }`}
               >
                 <Monitor className="h-4 w-4" />
@@ -141,245 +144,306 @@ function ThemeToggleWithDropdown() {
 }
 
 export function Header() {
-  // Estado para armazenar usuário logado
   const [user, setUser] = useState<User | null>(null);
-  // Estado para armazenar o nome completo do usuário
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const { getItemCount, setIsOpen, _hasHydrated } = useCartStore();
-
-  // Novo: Só renderiza ações do carrinho após hidratação
   const [isReady, setIsReady] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const navigationItems = [
+    { href: "/", label: "Início", icon: Home },
+    { href: "/courses", label: "Cursos", icon: BookOpen },
+    { href: "/blog", label: "Blog", icon: FileText },
+    { href: "/about", label: "Sobre", icon: Users },
+  ];
 
   useEffect(() => {
     setIsReady(_hasHydrated);
   }, [_hasHydrated]);
 
-  /**
-   * EFFECT PARA GERENCIAR AUTENTICAÇÃO E PERFIL
-   * Executa quando componente é montado
-   */
   useEffect(() => {
-    let isSubscribed = true; // Flag para evitar setState após desmontagem
+    let isSubscribed = true;
+    setIsLoading(true);
 
-    // 1. Verifica se já existe uma sessão ativa e busca o perfil
     const checkSessionAndProfile = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      if (session?.user && isSubscribed) {
-        setUser(session.user);
+        if (session?.user && isSubscribed) {
+          setUser(session.user);
 
-        // Buscar o perfil do usuário no banco de dados
-        const { data: profileData, error } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", session.user.id)
-          .single();
+          const { data: profileData, error } = await supabase
+            .from("profiles")
+            .select("full_name, avatar_url")
+            .eq("id", session.user.id)
+            .single();
 
-        if (error) {
-          console.error("Erro ao buscar perfil:", error);
-          // Se houver erro, pode ser que o perfil ainda não exista, então definimos como null
-          setUserProfile(null);
+          if (!error && profileData) {
+            setUserProfile(profileData);
+          } else {
+            setUserProfile(null);
+          }
         } else {
-          setUserProfile(profileData);
+          setUser(null);
+          setUserProfile(null);
         }
-      } else {
-        setUser(null);
-        setUserProfile(null);
+      } catch (error) {
+        console.error("Erro ao verificar sessão:", error);
+      } finally {
+        if (isSubscribed) {
+          setIsLoading(false);
+        }
       }
     };
 
     checkSessionAndProfile();
 
-    // 2. Configura listener para mudanças de autenticação
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session?.user) {
-        // Atualiza estado do usuário
-        if (isSubscribed) {
-          setUser(session.user);
+        setUser(session.user);
 
-          // Busca o perfil do usuário logado
-          const { data: profileData, error } = await supabase
-            .from("profiles")
-            .select("full_name")
-            .eq("id", session.user.id)
-            .single();
+        const { data: profileData, error } = await supabase
+          .from("profiles")
+          .select("full_name, avatar_url")
+          .eq("id", session.user.id)
+          .single();
 
-          if (error) {
-            console.error("Erro ao buscar perfil no evento de auth:", error);
-            setUserProfile(null);
-          } else {
-            setUserProfile(profileData);
-          }
-        }
-      } else {
-        // Usuário deslogado
-        if (isSubscribed) {
-          setUser(null);
+        if (!error && profileData) {
+          setUserProfile(profileData);
+        } else {
           setUserProfile(null);
         }
+      } else {
+        setUser(null);
+        setUserProfile(null);
       }
     });
 
-    // 3. Cleanup: remove listener e flag quando componente desmonta
     return () => {
       isSubscribed = false;
       subscription.unsubscribe();
     };
-  }, []); // Array vazio = executa apenas uma vez
+  }, []);
 
-  /**
-   * FUNÇÃO DE LOGOUT
-   * Desloga usuário e atualiza estado
-   */
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    // O listener onAuthStateChange vai atualizar automaticamente os estados setUser e setUserProfile
   };
 
-  // Nome a ser exibido
   const displayName =
     userProfile?.full_name || user?.email?.split("@")[0] || "Aluno";
 
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-40">
+    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
       <div className="container-custom flex h-16 items-center justify-between">
-        {/* LOGO - Sempre visível */}
-        <Link href="/" className="flex items-center space-x-3 group">
-          <div className="h-10 w-10 gradient-bg rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
-            <span className="text-white font-bold text-lg">C</span>
+        {/* LOGO MELHORADA */}
+        <Link
+          href="/"
+          className="flex items-center space-x-3 group flex-shrink-0"
+        >
+          <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+            <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-xl gradient-text leading-5">
+            <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-5">
               CodeCraft
             </span>
-            <span className="text-xs text-muted-foreground leading-3">
+            <span className="text-xs text-muted-foreground leading-3 dark:text-gray-400">
               Academy
             </span>
           </div>
         </Link>
 
-        {/* NAVEGAÇÃO PRINCIPAL - Oculto em mobile */}
-        <nav className="hidden md:flex items-center space-x-8">
-          <Link
-            href="/"
-            className="text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200 relative py-2 group"
-          >
-            Início
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
-          </Link>
-          <Link
-            href="/courses"
-            className="text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200 relative py-2 group"
-          >
-            Cursos
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
-          </Link>
-          <Link
-            href="/blog"
-            className="text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200 relative py-2 group"
-          >
-            Blog
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
-          </Link>
-          <Link
-            href="/about"
-            className="text-sm font-semibold text-foreground hover:text-primary transition-colors duration-200 relative py-2 group"
-          >
-            Sobre
-            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
-          </Link>
+        {/* NAVEGAÇÃO PRINCIPAL - MELHORADA */}
+        <nav className="hidden md:flex items-center space-x-1">
+          {navigationItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground hover:text-primary transition-all duration-200 rounded-lg hover:bg-accent/50 group"
+            >
+              <item.icon className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* ÁREA DE AÇÕES DO USUÁRIO */}
-        <div className="flex items-center space-x-3">
-          {/* Toggle de tema - sempre visível */}
+        {/* ÁREA DE AÇÕES DO USUÁRIO - MELHORADA */}
+        <div className="flex items-center space-x-2">
+          {/* Toggle de tema */}
           <ThemeToggleWithDropdown />
 
-          {/* Botão do Carrinho - só quando hidratado */}
-          {isReady && (
+          {/* Botão do Carrinho - com loading state */}
+          {isReady ? (
             <Button
               variant="outline"
               size="icon"
-              className="relative"
+              className="relative h-9 w-9 transition-all duration-300 hover:scale-110 hover:shadow-md"
               onClick={() => setIsOpen(true)}
             >
               <ShoppingCart className="h-4 w-4" />
               {getItemCount() > 0 && (
                 <Badge
                   variant="secondary"
-                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs animate-bounce"
                 >
                   {getItemCount()}
                 </Badge>
               )}
             </Button>
+          ) : (
+            <Button variant="outline" size="icon" className="h-9 w-9" disabled>
+              <ShoppingCart className="h-4 w-4 opacity-50" />
+            </Button>
           )}
 
-          {/* CONDICIONAL: Mostra estado baseado no login */}
-          {user ? (
-            <div className="flex items-center space-x-3">
-              {/* Link para o Dashboard */}
+          {/* Estados de autenticação */}
+          {isLoading ? (
+            // Loading state
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
+              <div className="hidden sm:flex space-x-2">
+                <div className="w-20 h-9 rounded-md bg-muted animate-pulse"></div>
+                <div className="w-16 h-9 rounded-md bg-muted animate-pulse"></div>
+              </div>
+            </div>
+          ) : user ? (
+            // Usuário logado
+            <div className="flex items-center space-x-2">
+              {/* Dashboard button - apenas desktop */}
               <Link href="/dashboard" className="hidden sm:inline">
                 <Button
                   variant="secondary"
                   size="sm"
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm"
+                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 transition-all duration-300 hover:scale-105"
                 >
                   <UserIcon className="h-4 w-4" />
-                  Dashboard
+                  <span className="hidden lg:inline">Dashboard</span>
                 </Button>
               </Link>
 
-              {/* Avatar do Usuário */}
+              {/* Avatar do usuário - CORRIGIDO: removida propriedade 'user' */}
               <UserAvatar size="md" showName={true} />
 
               {/* Botão Sair */}
               <Button
                 variant="outline"
                 size="sm"
-                className="btn btn-secondary"
+                className="hidden sm:flex btn btn-secondary hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-colors"
                 onClick={handleLogout}
               >
                 Sair
               </Button>
             </div>
           ) : (
-            // USUÁRIO NÃO LOGADO: Mostra botões de login/cadastro
+            // Usuário não logado
             <div className="hidden sm:flex items-center space-x-2">
               <Link href="/login">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary transition-all duration-300 hover:scale-105"
                 >
                   Entrar
                 </Button>
               </Link>
               <Link href="/register">
-                <Button size="sm" className="btn btn-primary">
+                <Button
+                  size="sm"
+                  className="btn btn-primary bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
+                >
                   Cadastrar
                 </Button>
               </Link>
             </div>
           )}
 
-          {/* MENU MOBILE - Placeholder para futuro menu hamburger */}
-          <button className="md:hidden p-2 rounded-md hover:bg-muted transition-colors">
-            <div className="w-5 h-5 flex flex-col justify-between">
-              <span className="w-full h-0.5 bg-foreground rounded"></span>
-              <span className="w-full h-0.5 bg-foreground rounded"></span>
-              <span className="w-full h-0.5 bg-foreground rounded"></span>
-            </div>
-          </button>
+          {/* MENU MOBILE MELHORADO */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="md:hidden h-9 w-9 transition-all duration-300 hover:scale-110"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
-      {/* BORDER GRADIENT DECORATIVA */}
-      <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
+      {/* MENU MOBILE EXPANDIDO */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t bg-background/95 backdrop-blur animate-in slide-in-from-top duration-300">
+          <div className="container-custom py-4 space-y-3">
+            {navigationItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:text-primary transition-all duration-200 rounded-lg hover:bg-accent/50 border border-transparent hover:border-accent"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <item.icon className="h-4 w-4" />
+                {item.label}
+              </Link>
+            ))}
+
+            {/* Ações mobile para usuário não logado */}
+            {!user && !isLoading && (
+              <div className="pt-2 border-t space-y-2">
+                <Link href="/login" className="block w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Entrar
+                  </Button>
+                </Link>
+                <Link href="/register" className="block w-full">
+                  <Button
+                    className="w-full justify-center bg-gradient-to-r from-blue-600 to-purple-600"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Cadastrar
+                  </Button>
+                </Link>
+              </div>
+            )}
+
+            {/* Ações mobile para usuário logado */}
+            {user && !isLoading && (
+              <div className="pt-2 border-t space-y-2">
+                <Link href="/dashboard" className="block w-full">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-center gap-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <UserIcon className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+                <Button
+                  variant="outline"
+                  className="w-full justify-center text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                >
+                  Sair
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* BORDER GRADIENT DECORATIVA CORRIGIDA */}
+      <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-purple-500/40"></div>
 
       {/* Sidebar do Carrinho */}
       <CartSidebar />
