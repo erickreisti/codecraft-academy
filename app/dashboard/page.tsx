@@ -1,4 +1,5 @@
-// app/dashboard/page.tsx - VERSÃO COM HEADER DESTACADO E MELHORIAS
+// app/dashboard/page.tsx - VERSÃO CORRIGIDA COM CONSULTA FUNCIONAL
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -25,27 +26,32 @@ import {
   Calendar,
   Award,
   Settings,
-  Bell,
   Star,
   Crown,
+  Play,
 } from "lucide-react";
 
 // INTERFACES
 interface Course {
+  id: string;
   title: string;
   slug: string;
-  image_url: string;
-  duration_hours: number;
+  image_url?: string;
+  duration_hours?: number;
   category?: string;
+  level?: string;
+  description?: string;
+  short_description?: string;
 }
 
 interface Enrollment {
   id: string;
+  course_id: string;
   completed: boolean;
   progress: number;
   enrolled_at: string;
   completed_at?: string;
-  courses: Course | null;
+  course?: Course;
 }
 
 interface Profile {
@@ -60,7 +66,7 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔍 BUSCAR DADOS DO USUÁRIO
+  // 🔍 BUSCAR DADOS DO USUÁRIO - VERSÃO CORRIGIDA
   useEffect(() => {
     const fetchUserData = async () => {
       try {
@@ -80,25 +86,62 @@ export default function DashboardPage() {
 
           setProfile(profileData);
 
-          // Buscar matrículas
-          const { data: enrollmentsData } = await supabase
-            .from("enrollments")
-            .select(
-              `
-              *,
-              courses (
-                title,
-                slug,
-                image_url,
-                duration_hours,
-                category
+          // 🔥 CONSULTA CORRIGIDA - Buscar matrículas e cursos separadamente
+          const { data: enrollmentsData, error: enrollmentsError } =
+            await supabase
+              .from("enrollments")
+              .select(
+                "id, course_id, completed, progress, enrolled_at, completed_at"
               )
-            `
-            )
-            .eq("user_id", currentSession.user.id)
-            .order("enrolled_at", { ascending: false });
+              .eq("user_id", currentSession.user.id)
+              .order("enrolled_at", { ascending: false });
 
-          setEnrollments(enrollmentsData || []);
+          if (enrollmentsError) {
+            console.error("❌ Erro ao buscar matrículas:", enrollmentsError);
+            return;
+          }
+
+          console.log("📚 Matrículas encontradas:", enrollmentsData);
+
+          // Se houver matrículas, buscar os cursos correspondentes
+          if (enrollmentsData && enrollmentsData.length > 0) {
+            const courseIds = enrollmentsData.map((e) => e.course_id);
+
+            console.log("🎯 IDs dos cursos:", courseIds);
+
+            const { data: coursesData, error: coursesError } = await supabase
+              .from("courses")
+              .select("*")
+              .in("id", courseIds);
+
+            if (coursesError) {
+              console.error("❌ Erro ao buscar cursos:", coursesError);
+              // Se der erro nos cursos, ainda mostra as matrículas sem detalhes dos cursos
+              setEnrollments(
+                enrollmentsData.map((enrollment) => ({
+                  ...enrollment,
+                  course: undefined,
+                }))
+              );
+            } else {
+              console.log("✅ Cursos encontrados:", coursesData);
+
+              // Combinar matrículas com cursos
+              const enrichedEnrollments = enrollmentsData.map((enrollment) => {
+                const course = coursesData?.find(
+                  (c) => c.id === enrollment.course_id
+                );
+                return {
+                  ...enrollment,
+                  course: course || undefined,
+                };
+              });
+
+              setEnrollments(enrichedEnrollments);
+            }
+          } else {
+            setEnrollments([]);
+          }
         }
       } catch (error) {
         console.error("💥 Erro ao buscar dados:", error);
@@ -215,7 +258,7 @@ export default function DashboardPage() {
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between py-8 lg:py-12">
             {/* INFORMAÇÕES DO USUÁRIO */}
             <div className="flex items-start lg:items-center gap-6 mb-6 lg:mb-0">
-              {/* AVATAR SIMPLES E ARREDONDADO - SEM BORDA */}
+              {/* AVATAR */}
               <div className="relative group">
                 <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 shadow-2xl">
                   {profile?.avatar_url ? (
@@ -238,11 +281,6 @@ export default function DashboardPage() {
 
                 {/* BADGE ONLINE */}
                 <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 border-4 border-white dark:border-gray-800 rounded-full"></div>
-
-                {/* OVERLAY HOVER */}
-                <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Settings className="h-6 w-6 text-white" />
-                </div>
               </div>
 
               {/* INFORMAÇÕES DE TEXTO */}
@@ -469,7 +507,7 @@ export default function DashboardPage() {
   );
 }
 
-// 🎴 COMPONENTE: CARD DE ESTATÍSTICA MELHORADO
+// 🎴 COMPONENTE: CARD DE ESTATÍSTICA
 interface StatCardProps {
   icon: React.ReactNode;
   title: string;
@@ -523,13 +561,23 @@ interface CourseCardProps {
 }
 
 function CourseCard({ enrollment }: CourseCardProps) {
-  const course = enrollment.courses;
+  const course = enrollment.course;
+
+  console.log("🎨 Renderizando card do curso:", course);
 
   return (
     <Card className="feature-card group hover-lift overflow-hidden bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 dark:border-gray-700">
       <CardHeader className="pb-6">
         <div className="h-48 gradient-bg rounded-xl flex items-center justify-center mb-6 relative overflow-hidden">
-          <span className="text-white text-5xl z-10">📚</span>
+          {course?.image_url ? (
+            <img
+              src={course.image_url}
+              alt={course.title}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-white text-5xl z-10">📚</span>
+          )}
           <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors"></div>
 
           {/* Badge de status */}
@@ -557,18 +605,26 @@ function CourseCard({ enrollment }: CourseCardProps) {
         </div>
 
         <CardTitle className="text-xl leading-tight line-clamp-2 group-hover:text-primary transition-colors min-h-[3rem] dark:text-white">
-          {course?.title || "Curso"}
+          {course?.title || "Curso em Andamento"}
         </CardTitle>
 
-        {course?.category && (
-          <CardDescription className="flex items-center gap-2 text-sm dark:text-gray-300">
-            <span className="bg-muted px-2 py-1 rounded-md dark:bg-gray-700">
-              {course.category}
-            </span>
-            <span>•</span>
-            <span>{course.duration_hours}h</span>
-          </CardDescription>
-        )}
+        <CardDescription className="flex items-center gap-2 text-sm dark:text-gray-300">
+          {course?.category && (
+            <>
+              <span className="bg-muted px-2 py-1 rounded-md dark:bg-gray-700">
+                {course.category}
+              </span>
+              <span>•</span>
+            </>
+          )}
+          <span>{course?.duration_hours || 8}h</span>
+          {course?.level && (
+            <>
+              <span>•</span>
+              <span className="capitalize">{course.level}</span>
+            </>
+          )}
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -635,14 +691,5 @@ function CourseCard({ enrollment }: CourseCardProps) {
         </div>
       </CardContent>
     </Card>
-  );
-}
-
-// Ícone Play para o botão
-function Play({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-      <path d="M8 5v14l11-7z" />
-    </svg>
   );
 }
