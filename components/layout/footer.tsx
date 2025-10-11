@@ -10,6 +10,7 @@
  * - Copyright e informações legais
  * - Design responsivo
  * - Modo dark aprimorado
+ * - Espaçamento otimizado
  */
 
 "use client";
@@ -83,10 +84,11 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t bg-background/95 backdrop-blur supports-backdrop-blur:bg-background/60 dark:bg-gray-900/95 dark:border-gray-800">
+    <footer className="border-t bg-background/95 backdrop-blur supports-backdrop-blur:bg-background/60 dark:bg-gray-900/95 dark:border-gray-800 mt-20 lg:mt-32">
+      {/* Espaçamento superior aumentado */}
       <div className="container-custom">
         {/* Main Footer - Grid com 4 colunas em desktop */}
-        <div className="section-py grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div className="py-16 lg:py-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16">
           {/* Brand - Coluna da marca */}
           <div className="lg:col-span-1 space-y-6">
             <Link href="/" className="flex items-center space-x-3 group">
@@ -103,13 +105,13 @@ export function Footer() {
               </div>
             </Link>
 
-            <p className="text-muted-foreground text-sm leading-relaxed dark:text-gray-400">
+            <p className="text-muted-foreground text-sm leading-relaxed dark:text-gray-400 max-w-xs">
               Aprenda programação do zero ao profissional com cursos práticos,
               projetos reais e mentoria especializada. Transforme sua carreira
               em tecnologia.
             </p>
 
-            <div className="flex space-x-3">
+            <div className="flex space-x-3 pt-2">
               {socialLinks.map((social) => (
                 <Button
                   key={social.name}
@@ -131,19 +133,19 @@ export function Footer() {
           </div>
 
           {/* Cursos - Links para categorias de cursos */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             <h3 className="font-semibold text-lg flex items-center gap-2 text-foreground dark:text-white">
               <BookOpen className="h-5 w-5 text-blue-600" />
               Cursos
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {courseLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-all duration-300 hover:translate-x-1 group dark:text-gray-400 dark:hover:text-white"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-all duration-300 hover:translate-x-2 group dark:text-gray-400 dark:hover:text-white"
                   >
-                    <link.icon className="h-4 w-4 opacity-70 group-hover:opacity-100" />
+                    <link.icon className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
                     {link.name}
                   </Link>
                 </li>
@@ -152,19 +154,19 @@ export function Footer() {
           </div>
 
           {/* Empresa - Links institucionais */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             <h3 className="font-semibold text-lg flex items-center gap-2 text-foreground dark:text-white">
               <Users className="h-5 w-5 text-purple-600" />
               Empresa
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {companyLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-all duration-300 hover:translate-x-1 group dark:text-gray-400 dark:hover:text-white"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-all duration-300 hover:translate-x-2 group dark:text-gray-400 dark:hover:text-white"
                   >
-                    <link.icon className="h-4 w-4 opacity-70 group-hover:opacity-100" />
+                    <link.icon className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
                     {link.name}
                   </Link>
                 </li>
@@ -173,19 +175,19 @@ export function Footer() {
           </div>
 
           {/* Suporte - Links de ajuda e legal */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             <h3 className="font-semibold text-lg flex items-center gap-2 text-foreground dark:text-white">
               <Shield className="h-5 w-5 text-green-600" />
               Suporte
             </h3>
-            <ul className="space-y-3">
+            <ul className="space-y-4">
               {supportLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-all duration-300 hover:translate-x-1 group dark:text-gray-400 dark:hover:text-white"
+                    className="flex items-center gap-3 text-sm text-muted-foreground hover:text-primary transition-all duration-300 hover:translate-x-2 group dark:text-gray-400 dark:hover:text-white"
                   >
-                    <link.icon className="h-4 w-4 opacity-70 group-hover:opacity-100" />
+                    <link.icon className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
                     {link.name}
                   </Link>
                 </li>
@@ -195,25 +197,25 @@ export function Footer() {
         </div>
 
         {/* Bottom Footer - Copyright e informações legais */}
-        <div className="border-t py-8 flex flex-col lg:flex-row justify-between items-center gap-4 dark:border-gray-800">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground dark:text-gray-400">
+        <div className="border-t py-8 flex flex-col lg:flex-row justify-between items-center gap-6 dark:border-gray-800">
+          <div className="flex flex-col sm:flex-row items-center gap-4 text-sm text-muted-foreground dark:text-gray-400 text-center sm:text-left">
             <p>
               © {currentYear} CodeCraft Academy. Todos os direitos reservados.
             </p>
-            <div className="hidden md:flex items-center gap-4">
-              <span className="w-1 h-1 bg-muted-foreground rounded-full dark:bg-gray-600"></span>
+            <div className="flex items-center gap-4">
+              <span className="hidden sm:block w-1 h-1 bg-muted-foreground rounded-full dark:bg-gray-600"></span>
               <Link
                 href="/privacy"
-                className="hover:text-primary transition-colors dark:hover:text-white"
+                className="hover:text-primary transition-colors dark:hover:text-white whitespace-nowrap"
               >
-                Privacidade
+                Política de Privacidade
               </Link>
               <span className="w-1 h-1 bg-muted-foreground rounded-full dark:bg-gray-600"></span>
               <Link
                 href="/terms"
-                className="hover:text-primary transition-colors dark:hover:text-white"
+                className="hover:text-primary transition-colors dark:hover:text-white whitespace-nowrap"
               >
-                Termos
+                Termos de Uso
               </Link>
             </div>
           </div>
@@ -221,7 +223,7 @@ export function Footer() {
           <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-gray-400">
             <span>Feito com</span>
             <Heart className="h-4 w-4 text-red-500 fill-current animate-pulse" />
-            <span>para a comunidade dev</span>
+            <span>para devs</span>
           </div>
         </div>
       </div>
