@@ -1,4 +1,4 @@
-// components/layout/header.tsx - VERSÃO COM DROPDOWN COMPLETO
+// components/layout/header.tsx - VERSÃO COMPLETA E CORRIGIDA
 
 /**
  * HEADER COM AUTENTICAÇÃO E CARRINHO - CodeCraft Academy
@@ -68,16 +68,6 @@ function ThemeToggleWithDropdown() {
     localStorage.setItem("theme", newTheme);
     applyTheme(newTheme);
     setIsOpen(false);
-  };
-
-  const getCurrentThemeName = () => {
-    if (theme === "system") {
-      const systemPrefersDark = window.matchMedia(
-        "(prefers-color-scheme: dark)"
-      ).matches;
-      return systemPrefersDark ? "Escuro (Sistema)" : "Claro (Sistema)";
-    }
-    return theme === "dark" ? "Escuro" : "Claro";
   };
 
   if (!mounted) {
@@ -154,26 +144,14 @@ export function Header() {
   const [user, setUser] = useState<User | null>(null);
   // Estado para armazenar o nome completo do usuário
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const { getItemCount, setIsOpen, _hasHydrated } = useCartStore();
 
-  // Store do carrinho
-  const { getItemCount, setIsOpen, syncState } = useCartStore();
+  // Novo: Só renderiza ações do carrinho após hidratação
+  const [isReady, setIsReady] = useState(false);
 
-  // NOVO EFFECT: Sincronizar carrinho entre abas
   useEffect(() => {
-    // Sincroniza ao montar
-    syncState();
-
-    // Listener para sincronização automática
-    const handleStorageSync = () => {
-      syncState();
-    };
-
-    window.addEventListener("storage", handleStorageSync);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageSync);
-    };
-  }, [syncState]);
+    setIsReady(_hasHydrated);
+  }, [_hasHydrated]);
 
   /**
    * EFFECT PARA GERENCIAR AUTENTICAÇÃO E PERFIL
@@ -317,26 +295,28 @@ export function Header() {
 
         {/* ÁREA DE AÇÕES DO USUÁRIO */}
         <div className="flex items-center space-x-3">
-          {/* Toggle de tema com dropdown - sempre visível */}
+          {/* Toggle de tema - sempre visível */}
           <ThemeToggleWithDropdown />
 
-          {/* Botão do Carrinho - sempre visível */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="relative"
-            onClick={() => setIsOpen(true)}
-          >
-            <ShoppingCart className="h-4 w-4" />
-            {getItemCount() > 0 && (
-              <Badge
-                variant="secondary"
-                className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-              >
-                {getItemCount()}
-              </Badge>
-            )}
-          </Button>
+          {/* Botão do Carrinho - só quando hidratado */}
+          {isReady && (
+            <Button
+              variant="outline"
+              size="icon"
+              className="relative"
+              onClick={() => setIsOpen(true)}
+            >
+              <ShoppingCart className="h-4 w-4" />
+              {getItemCount() > 0 && (
+                <Badge
+                  variant="secondary"
+                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+                >
+                  {getItemCount()}
+                </Badge>
+              )}
+            </Button>
+          )}
 
           {/* CONDICIONAL: Mostra estado baseado no login */}
           {user ? (

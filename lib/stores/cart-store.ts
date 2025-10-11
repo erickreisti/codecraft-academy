@@ -1,4 +1,4 @@
-// lib/stores/cart-store.ts - VERSÃO CORRIGIDA
+// lib/stores/cart-store.ts - VERSÃO DEFINITIVA
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
@@ -16,6 +16,7 @@ interface CartStore {
   isOpen: boolean;
   lastAddedItem: CartItem | null;
   showNotification: boolean;
+  _hasHydrated: boolean; // Novo: controle de hidratação
 
   // Métodos
   addItem: (course: Omit<CartItem, "quantity">) => void;
@@ -29,9 +30,7 @@ interface CartStore {
   isInCart: (id: string) => boolean;
   getSubtotal: () => number;
   hideNotification: () => void;
-
-  // NOVO: Sincronizar estado
-  syncState: () => void;
+  setHasHydrated: (state: boolean) => void; // Novo
 }
 
 export const useCartStore = create<CartStore>()(
@@ -41,17 +40,19 @@ export const useCartStore = create<CartStore>()(
       isOpen: false,
       lastAddedItem: null,
       showNotification: false,
+      _hasHydrated: false, // Inicialmente false
 
-      // NOVO: Sincronizar estado entre abas
-      syncState: () => {
-        if (typeof window !== "undefined") {
-          // Dispara evento customizado para sincronizar outras abas
-          window.dispatchEvent(new Event("storage"));
-        }
+      // Novo método para controle de hidratação
+      setHasHydrated: (state) => {
+        set({ _hasHydrated: state });
       },
 
       addItem: (course) => {
-        const { items, syncState } = get();
+        const { items, _hasHydrated } = get();
+
+        // Só permite adicionar se já hidratou
+        if (!_hasHydrated) return;
+
         const existingItem = items.find((item) => item.id === course.id);
 
         let newItems: CartItem[];
@@ -75,22 +76,20 @@ export const useCartStore = create<CartStore>()(
           isOpen: true,
         });
 
-        // Sincroniza outras abas
-        syncState();
-
         setTimeout(() => {
           get().hideNotification();
         }, 3000);
       },
 
       removeItem: (id) => {
-        const { items, syncState } = get();
+        const { items, _hasHydrated } = get();
+        if (!_hasHydrated) return;
         set({ items: items.filter((item) => item.id !== id) });
-        syncState();
       },
 
       updateQuantity: (id, quantity) => {
-        const { items, syncState } = get();
+        const { items, _hasHydrated } = get();
+        if (!_hasHydrated) return;
 
         if (quantity <= 0) {
           get().removeItem(id);
@@ -102,17 +101,17 @@ export const useCartStore = create<CartStore>()(
             item.id === id ? { ...item, quantity } : item
           ),
         });
-        syncState();
       },
 
       clearCart: () => {
-        const { syncState } = get();
+        const { _hasHydrated } = get();
+        if (!_hasHydrated) return;
         set({ items: [], showNotification: false });
-        syncState();
       },
 
       getTotal: () => {
-        const { items } = get();
+        const { items, _hasHydrated } = get();
+        if (!_hasHydrated) return 0;
         return items.reduce(
           (total, item) => total + item.price * item.quantity,
           0
@@ -120,7 +119,8 @@ export const useCartStore = create<CartStore>()(
       },
 
       getSubtotal: () => {
-        const { items } = get();
+        const { items, _hasHydrated } = get();
+        if (!_hasHydrated) return 0;
         return items.reduce(
           (subtotal, item) => subtotal + item.price * item.quantity,
           0
@@ -128,42 +128,45 @@ export const useCartStore = create<CartStore>()(
       },
 
       getItemCount: () => {
-        const { items } = get();
+        const { items, _hasHydrated } = get();
+        if (!_hasHydrated) return 0;
         return items.reduce((count, item) => count + item.quantity, 0);
       },
 
       getItem: (id) => {
-        const { items } = get();
+        const { items, _hasHydrated } = get();
+        if (!_hasHydrated) return undefined;
         return items.find((item) => item.id === id);
       },
 
       isInCart: (id) => {
-        const { items } = get();
+        const { items, _hasHydrated } = get();
+        if (!_hasHydrated) return false;
         return items.some((item) => item.id === id);
       },
 
-      setIsOpen: (isOpen) => set({ isOpen }),
+      setIsOpen: (isOpen) => {
+        const { _hasHydrated } = get();
+        if (!_hasHydrated) return;
+        set({ isOpen });
+      },
 
-      hideNotification: () => set({ showNotification: false }),
+      hideNotification: () => {
+        const { _hasHydrated } = get();
+        if (!_hasHydrated) return;
+        set({ showNotification: false });
+      },
     }),
     {
       name: "codecraft-cart-storage",
       storage: createJSONStorage(() => localStorage),
-      // Sincronização entre abas
+      // CORREÇÃO CRÍTICA: Controle de hidratação
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.syncState();
+          state.setHasHydrated(true);
         }
       },
+      skipHydration: false,
     }
   )
 );
-
-// NOVO: Listener para sincronização entre abas
-if (typeof window !== "undefined") {
-  window.addEventListener("storage", (e) => {
-    if (e.key === "codecraft-cart-storage") {
-      useCartStore.persist.rehydrate();
-    }
-  });
-}
