@@ -1,4 +1,4 @@
-// components/layout/header.tsx
+// components/layout/header.tsx - VERSÃO CORRIGIDA
 
 /**
  * HEADER COM AUTENTICAÇÃO E CARRINHO - CodeCraft Academy
@@ -21,16 +21,76 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { supabase } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { ShoppingCart, User as UserIcon } from "lucide-react";
+import { ShoppingCart, User as UserIcon, Moon, Sun } from "lucide-react";
 
 // Interface simplificada para o perfil do usuário (apenas o necessário)
 interface UserProfile {
   full_name?: string;
+}
+
+// Componente de toggle de tema simplificado
+function SimpleThemeToggle() {
+  const [mounted, setMounted] = useState(false);
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    setMounted(true);
+    const savedTheme = localStorage.getItem("theme") || "light";
+    const systemPrefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+
+    const currentTheme =
+      savedTheme === "system"
+        ? systemPrefersDark
+          ? "dark"
+          : "light"
+        : savedTheme;
+    setTheme(currentTheme);
+
+    if (currentTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+
+    if (newTheme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
+
+  if (!mounted) {
+    return (
+      <Button variant="outline" size="icon" disabled className="h-9 w-9">
+        <Sun className="h-4 w-4" />
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="icon"
+      className="h-9 w-9 relative"
+      onClick={toggleTheme}
+      aria-label="Alternar tema"
+    >
+      <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+    </Button>
+  );
 }
 
 export function Header() {
@@ -185,7 +245,7 @@ export function Header() {
         {/* ÁREA DE AÇÕES DO USUÁRIO */}
         <div className="flex items-center space-x-3">
           {/* Toggle de tema - sempre visível */}
-          <ThemeToggle />
+          <SimpleThemeToggle />
 
           {/* Botão do Carrinho - sempre visível */}
           <Button
@@ -193,32 +253,15 @@ export function Header() {
             size="icon"
             className="relative"
             onClick={() => setIsOpen(true)}
-            asChild={getItemCount() > 0}
           >
-            {getItemCount() > 0 ? (
-              <Link href="/checkout">
-                <ShoppingCart className="h-4 w-4" />
-                {getItemCount() > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                  >
-                    {getItemCount()}
-                  </Badge>
-                )}
-              </Link>
-            ) : (
-              <>
-                <ShoppingCart className="h-4 w-4" />
-                {getItemCount() > 0 && (
-                  <Badge
-                    variant="secondary"
-                    className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
-                  >
-                    {getItemCount()}
-                  </Badge>
-                )}
-              </>
+            <ShoppingCart className="h-4 w-4" />
+            {getItemCount() > 0 && (
+              <Badge
+                variant="secondary"
+                className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs"
+              >
+                {getItemCount()}
+              </Badge>
             )}
           </Button>
 
@@ -229,11 +272,11 @@ export function Header() {
               {/* Link para o Dashboard */}
               <Link href="/dashboard" className="hidden sm:inline">
                 <Button
-                  variant="secondary" // <--- AQUI: Usando 'secondary' para um background mais chamativo (definido em globals.css)
+                  variant="secondary"
                   size="sm"
-                  className="flex items-center gap-1 px-3 py-1.5 text-sm" // Ajuste fino de padding e texto para consistência
+                  className="flex items-center gap-1 px-3 py-1.5 text-sm"
                 >
-                  <UserIcon className="h-4 w-4" /> {/* Ícone opcional */}
+                  <UserIcon className="h-4 w-4" />
                   Dashboard
                 </Button>
               </Link>
