@@ -1,4 +1,4 @@
-// components/layout/header.tsx - VERSÃO CORRIGIDA
+// components/layout/header.tsx - VERSÃO COM DROPDOWN COMPLETO
 
 /**
  * HEADER COM AUTENTICAÇÃO E CARRINHO - CodeCraft Academy
@@ -25,50 +25,59 @@ import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { useCartStore } from "@/lib/stores/cart-store";
 import { supabase } from "@/lib/supabase/client";
 import { User } from "@supabase/supabase-js";
-import { ShoppingCart, User as UserIcon, Moon, Sun } from "lucide-react";
+import {
+  ShoppingCart,
+  User as UserIcon,
+  Moon,
+  Sun,
+  Monitor,
+} from "lucide-react";
 
 // Interface simplificada para o perfil do usuário (apenas o necessário)
 interface UserProfile {
   full_name?: string;
 }
 
-// Componente de toggle de tema simplificado
-function SimpleThemeToggle() {
+// Componente de toggle de tema com dropdown
+function ThemeToggleWithDropdown() {
   const [mounted, setMounted] = useState(false);
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState("system");
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem("theme") || "light";
+    const savedTheme = localStorage.getItem("theme") || "system";
+    setTheme(savedTheme);
+    applyTheme(savedTheme);
+  }, []);
+
+  const applyTheme = (themeName: string) => {
     const systemPrefersDark = window.matchMedia(
       "(prefers-color-scheme: dark)"
     ).matches;
 
-    const currentTheme =
-      savedTheme === "system"
-        ? systemPrefersDark
-          ? "dark"
-          : "light"
-        : savedTheme;
-    setTheme(currentTheme);
-
-    if (currentTheme === "dark") {
+    if (themeName === "dark" || (themeName === "system" && systemPrefersDark)) {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
-  }, []);
+  };
 
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
+  const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
+    applyTheme(newTheme);
+    setIsOpen(false);
+  };
 
-    if (newTheme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
+  const getCurrentThemeName = () => {
+    if (theme === "system") {
+      const systemPrefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)"
+      ).matches;
+      return systemPrefersDark ? "Escuro (Sistema)" : "Claro (Sistema)";
     }
+    return theme === "dark" ? "Escuro" : "Claro";
   };
 
   if (!mounted) {
@@ -80,16 +89,63 @@ function SimpleThemeToggle() {
   }
 
   return (
-    <Button
-      variant="outline"
-      size="icon"
-      className="h-9 w-9 relative"
-      onClick={toggleTheme}
-      aria-label="Alternar tema"
-    >
-      <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-    </Button>
+    <div className="relative">
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-9 w-9 relative"
+        onClick={() => setIsOpen(!isOpen)}
+        aria-label="Selecionar tema"
+      >
+        <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+        <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      </Button>
+
+      {/* Dropdown manual */}
+      {isOpen && (
+        <>
+          {/* Overlay para fechar ao clicar fora */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+
+          <div className="absolute right-0 top-12 z-50 w-40 rounded-md border bg-background p-2 shadow-lg">
+            <div className="space-y-1">
+              <button
+                onClick={() => handleThemeChange("light")}
+                className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
+                  theme === "light" ? "bg-accent text-accent-foreground" : ""
+                }`}
+              >
+                <Sun className="h-4 w-4" />
+                <span>Claro</span>
+              </button>
+
+              <button
+                onClick={() => handleThemeChange("dark")}
+                className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
+                  theme === "dark" ? "bg-accent text-accent-foreground" : ""
+                }`}
+              >
+                <Moon className="h-4 w-4" />
+                <span>Escuro</span>
+              </button>
+
+              <button
+                onClick={() => handleThemeChange("system")}
+                className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors hover:bg-accent hover:text-accent-foreground ${
+                  theme === "system" ? "bg-accent text-accent-foreground" : ""
+                }`}
+              >
+                <Monitor className="h-4 w-4" />
+                <span>Sistema</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
 
@@ -244,8 +300,8 @@ export function Header() {
 
         {/* ÁREA DE AÇÕES DO USUÁRIO */}
         <div className="flex items-center space-x-3">
-          {/* Toggle de tema - sempre visível */}
-          <SimpleThemeToggle />
+          {/* Toggle de tema com dropdown - sempre visível */}
+          <ThemeToggleWithDropdown />
 
           {/* Botão do Carrinho - sempre visível */}
           <Button
