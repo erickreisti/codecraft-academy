@@ -1,4 +1,4 @@
-// app/dashboard/profile/page.tsx - VERSÃO FINAL COM AVATAR FUNCIONAL
+// app/dashboard/profile/page.tsx - VERSÃO PREMIUM
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -33,6 +33,10 @@ import {
   Camera,
   Upload,
   Trash2,
+  Award,
+  Star,
+  Settings,
+  Rocket,
 } from "lucide-react";
 import { uploadAvatar, deleteImage } from "@/lib/utils/upload";
 
@@ -206,7 +210,7 @@ export default function ProfilePage() {
     }
   };
 
-  // ✅ FUNÇÃO PARA SALVAR PERFIL (UNIVERSAL)
+  // ✅ FUNÇÃO PARA SALVAR PERFIL
   const handleSaveProfile = async (formData: FormData) => {
     if (!session) {
       toast.error("Sessão expirada. Faça login novamente.");
@@ -253,7 +257,7 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center">
         <div className="text-center space-y-6">
           <Spinner size="lg" className="mx-auto" />
           <div className="space-y-2">
@@ -269,7 +273,7 @@ export default function ProfilePage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center">
         <div className="text-center space-y-6">
           <div className="text-6xl mb-4">🔐</div>
           <div className="space-y-2">
@@ -285,41 +289,150 @@ export default function ProfilePage() {
     );
   }
 
+  const displayName =
+    profile?.full_name || session.user.email?.split("@")[0] || "Usuário";
+
   return (
-    <div className="min-h-screen bg-background">
-      {/* HEADER MELHORADO */}
-      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+      {/* HEADER DESTACADO */}
+      <header className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white shadow-2xl">
         <div className="container-custom">
-          <div className="flex h-20 items-center justify-between">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-                <User className="h-8 w-8 text-primary" />
-                Meu Perfil
-              </h1>
-              <p className="text-muted-foreground text-lg">
-                Gerencie suas informações pessoais e preferências
-              </p>
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between py-8 lg:py-12">
+            {/* INFORMAÇÕES DO USUÁRIO */}
+            <div className="flex items-start lg:items-center gap-6 mb-6 lg:mb-0">
+              {/* AVATAR GRANDE E DESTACADO */}
+              <div className="relative group">
+                <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-2xl border-4 border-white/30 shadow-2xl overflow-hidden bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm">
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500">
+                      <span className="text-2xl lg:text-3xl font-bold text-white">
+                        {displayName[0]?.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* BADGE ONLINE */}
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 border-4 border-white rounded-full"></div>
+
+                {/* OVERLAY HOVER */}
+                <div className="absolute inset-0 bg-black/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Camera className="h-6 w-6 text-white" />
+                </div>
+              </div>
+
+              {/* INFORMAÇÕES DE TEXTO */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-2xl lg:text-4xl font-bold tracking-tight">
+                    Meu Perfil
+                  </h1>
+
+                  {/* BADGE DE DESTAQUE */}
+                  {profile?.role === "admin" && (
+                    <div className="inline-flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold">
+                      <Crown className="h-3 w-3" />
+                      ADMIN
+                    </div>
+                  )}
+                  {profile?.role === "instructor" && (
+                    <div className="inline-flex items-center gap-1 bg-green-400 text-green-900 px-3 py-1 rounded-full text-sm font-bold">
+                      <Star className="h-3 w-3" />
+                      INSTRUTOR
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 text-blue-100">
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span className="text-sm lg:text-base">{displayName}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    <span className="text-sm lg:text-base">
+                      {session.user.email}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span className="text-sm lg:text-base">
+                      Membro há {monthsAsMember}{" "}
+                      {monthsAsMember === 1 ? "mês" : "meses"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* MENSAGEM PERSONALIZADA */}
+                <p className="text-blue-100 text-sm lg:text-base max-w-2xl">
+                  {profile?.role === "admin"
+                    ? "🎯 Você tem acesso completo à plataforma como administrador."
+                    : profile?.role === "instructor"
+                    ? "📚 Compartilhe seu conhecimento e inspire outros alunos."
+                    : "🌟 Continue sua jornada de aprendizado e alcance seus objetivos!"}
+                </p>
+              </div>
             </div>
-            <Button asChild variant="outline" className="group btn-lg">
-              <Link href="/dashboard" className="flex items-center gap-3">
-                <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-                Voltar ao Dashboard
-              </Link>
-            </Button>
+
+            {/* AÇÕES RÁPIDAS */}
+            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+              <Button
+                asChild
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white btn-lg transition-all duration-300 hover:scale-105"
+              >
+                <Link href="/dashboard" className="flex items-center gap-3">
+                  <ArrowLeft className="h-5 w-5" />
+                  Voltar ao Dashboard
+                </Link>
+              </Button>
+            </div>
           </div>
+        </div>
+
+        {/* ONDA DECORATIVA */}
+        <div className="w-full overflow-hidden">
+          <svg
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+            className="w-full h-12 text-white fill-current"
+          >
+            <path
+              d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
+              opacity=".25"
+              className="shape-fill"
+            ></path>
+            <path
+              d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z"
+              opacity=".5"
+              className="shape-fill"
+            ></path>
+            <path
+              d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
+              className="shape-fill"
+            ></path>
+          </svg>
         </div>
       </header>
 
-      {/* MAIN CONTENT COM ESPAÇAMENTOS PROFISSIONAIS */}
-      <main className="container-custom py-12">
-        <div className="grid gap-12 lg:grid-cols-3">
+      {/* CONTEÚDO PRINCIPAL */}
+      <main className="container-custom py-12 -mt-8 relative z-10">
+        <div className="grid gap-8 lg:grid-cols-3">
           {/* FORMULÁRIO DE PERFIL - LADO ESQUERDO */}
           <div className="lg:col-span-2">
-            <Card className="hover-lift p-1">
+            <Card className="hover-lift p-1 border-0 shadow-xl bg-white/70 backdrop-blur-sm">
               <CardHeader className="pb-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <Edit3 className="h-6 w-6 text-primary" />
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                    <Edit3 className="h-6 w-6 text-white" />
                   </div>
                   <div className="space-y-1">
                     <CardTitle className="text-2xl">
@@ -343,24 +456,27 @@ export default function ProfilePage() {
                     {/* AVATAR PREVIEW */}
                     <div className="flex-shrink-0">
                       <div className="relative group">
-                        <div className="w-24 h-24 rounded-full border-4 border-background shadow-lg overflow-hidden bg-gradient-to-br from-muted/50 to-muted flex items-center justify-center">
+                        <div className="w-24 h-24 rounded-2xl border-4 border-white shadow-lg overflow-hidden bg-gradient-to-br from-muted/50 to-muted flex items-center justify-center">
                           {profile?.avatar_url ? (
                             <img
                               src={profile.avatar_url}
                               alt="Avatar"
                               className="w-full h-full object-cover"
                               onError={(e) => {
-                                // Fallback se a imagem não carregar
                                 e.currentTarget.style.display = "none";
                               }}
                             />
                           ) : (
-                            <User className="h-10 w-10 text-muted-foreground" />
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+                              <span className="text-2xl font-bold text-white">
+                                {displayName[0]?.toUpperCase()}
+                              </span>
+                            </div>
                           )}
                         </div>
 
                         {/* OVERLAY COM AÇÕES NO HOVER */}
-                        <div className="absolute inset-0 rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <Camera className="h-6 w-6 text-white" />
                         </div>
                       </div>
@@ -503,7 +619,7 @@ export default function ProfilePage() {
                   {/* BOTÃO SALVAR */}
                   <Button
                     type="submit"
-                    className="w-full h-14 text-base font-semibold btn btn-primary group"
+                    className="w-full h-14 text-base font-semibold btn btn-primary group bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                     disabled={saving || uploadingAvatar}
                   >
                     {saving ? (
@@ -526,11 +642,11 @@ export default function ProfilePage() {
           {/* INFORMACOES DA CONTA - LADO DIREITO */}
           <div className="space-y-8">
             {/* CARD DE INFORMAÇÕES DA CONTA */}
-            <Card className="hover-lift">
+            <Card className="hover-lift border-0 shadow-xl bg-white/70 backdrop-blur-sm">
               <CardHeader className="pb-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/10 rounded-lg">
-                    <User className="h-6 w-6 text-blue-600" />
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+                    <User className="h-6 w-6 text-white" />
                   </div>
                   <CardTitle className="text-xl">
                     Informações da Conta
@@ -558,10 +674,10 @@ export default function ProfilePage() {
                   <div
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium ${
                       profile?.role === "admin"
-                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
+                        ? "bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900 border border-yellow-300"
                         : profile?.role === "instructor"
-                        ? "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300 border border-orange-200 dark:border-orange-800"
-                        : "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                        ? "bg-gradient-to-r from-green-400 to-green-500 text-green-900 border border-green-300"
+                        : "bg-gradient-to-r from-blue-400 to-blue-500 text-blue-900 border border-blue-300"
                     }`}
                   >
                     {profile?.role === "admin" ? (
@@ -571,7 +687,7 @@ export default function ProfilePage() {
                       </>
                     ) : profile?.role === "instructor" ? (
                       <>
-                        <BookOpen className="h-4 w-4" />
+                        <Award className="h-4 w-4" />
                         <span>Instrutor</span>
                       </>
                     ) : (
@@ -598,7 +714,7 @@ export default function ProfilePage() {
                         day: "numeric",
                       })}
                     </p>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full text-xs font-medium">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-green-400 to-green-500 text-green-900 rounded-full text-xs font-medium">
                       <span>✅</span>
                       <span>
                         {monthsAsMember}{" "}
@@ -611,11 +727,11 @@ export default function ProfilePage() {
             </Card>
 
             {/* AÇÕES RÁPIDAS */}
-            <Card className="hover-lift">
+            <Card className="hover-lift border-0 shadow-xl bg-white/70 backdrop-blur-sm">
               <CardHeader className="pb-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-500/10 rounded-lg">
-                    <Lock className="h-6 w-6 text-orange-600" />
+                  <div className="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg">
+                    <Settings className="h-6 w-6 text-white" />
                   </div>
                   <CardTitle className="text-xl">Ações Rápidas</CardTitle>
                 </div>
@@ -623,7 +739,7 @@ export default function ProfilePage() {
               <CardContent className="space-y-4">
                 <Button
                   variant="outline"
-                  className="w-full h-12 justify-start gap-3 text-base hover:bg-muted/50 transition-colors"
+                  className="w-full h-12 justify-start gap-3 text-base hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 transition-all duration-300"
                   asChild
                 >
                   <Link href="/forgot-password">
@@ -634,7 +750,7 @@ export default function ProfilePage() {
 
                 <Button
                   variant="outline"
-                  className="w-full h-12 justify-start gap-3 text-base hover:bg-muted/50 transition-colors"
+                  className="w-full h-12 justify-start gap-3 text-base hover:bg-green-50 hover:text-green-700 hover:border-green-200 transition-all duration-300"
                   asChild
                 >
                   <Link href="/dashboard">
@@ -647,7 +763,7 @@ export default function ProfilePage() {
                 {profile?.role === "admin" && (
                   <Button
                     variant="outline"
-                    className="w-full h-12 justify-start gap-3 text-base hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 dark:hover:bg-purple-900/20 dark:hover:text-purple-300 transition-colors"
+                    className="w-full h-12 justify-start gap-3 text-base hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 transition-all duration-300"
                     asChild
                   >
                     <Link href="/admin">
@@ -661,15 +777,39 @@ export default function ProfilePage() {
                 {profile?.role === "instructor" && (
                   <Button
                     variant="outline"
-                    className="w-full h-12 justify-start gap-3 text-base hover:bg-orange-50 hover:text-orange-700 hover:border-orange-200 dark:hover:bg-orange-900/20 dark:hover:text-orange-300 transition-colors"
+                    className="w-full h-12 justify-start gap-3 text-base hover:bg-orange-50 hover:text-orange-700 hover:border-orange-200 transition-all duration-300"
                     asChild
                   >
                     <Link href="/instructor">
-                      <BookOpen className="h-5 w-5" />
+                      <Award className="h-5 w-5" />
                       Painel do Instrutor
                     </Link>
                   </Button>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* CARD DE MOTIVAÇÃO */}
+            <Card className="hover-lift border-0 shadow-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+              <CardContent className="pt-6">
+                <div className="text-center space-y-4">
+                  <div className="text-4xl">🌟</div>
+                  <h3 className="font-bold text-lg">Continue Evoluindo!</h3>
+                  <p className="text-blue-100 text-sm">
+                    Cada passo na sua jornada de aprendizado te aproxima dos
+                    seus objetivos.
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="w-full bg-white/20 hover:bg-white/30 text-white border-white/30 mt-4"
+                    asChild
+                  >
+                    <Link href="/courses">
+                      <Rocket className="h-4 w-4 mr-2" />
+                      Explorar Novos Cursos
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>

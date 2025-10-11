@@ -1,3 +1,4 @@
+// app/dashboard/page.tsx - VERSÃO COM HEADER DESTACADO
 "use client";
 
 import { useState, useEffect } from "react";
@@ -23,9 +24,13 @@ import {
   ArrowRight,
   Calendar,
   Award,
+  Settings,
+  Bell,
+  Star,
+  Crown,
 } from "lucide-react";
 
-// INTERFACES PARA TIPAGEM FORTE
+// INTERFACES
 interface Course {
   title: string;
   slug: string;
@@ -45,6 +50,7 @@ interface Enrollment {
 
 interface Profile {
   full_name?: string;
+  avatar_url?: string;
   role?: string;
 }
 
@@ -54,9 +60,9 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // 🔍 VERIFICAR SESSÃO NO CLIENTE
+  // 🔍 BUSCAR DADOS DO USUÁRIO
   useEffect(() => {
-    const checkSession = async () => {
+    const fetchUserData = async () => {
       try {
         const {
           data: { session: currentSession },
@@ -65,26 +71,52 @@ export default function DashboardPage() {
         setSession(currentSession);
 
         if (currentSession) {
-          // 🎯 BUSCAR DADOS DO USUÁRIO
-          await fetchUserData(currentSession.user.id);
+          // Buscar perfil com avatar
+          const { data: profileData } = await supabase
+            .from("profiles")
+            .select("full_name, avatar_url, role")
+            .eq("id", currentSession.user.id)
+            .single();
+
+          setProfile(profileData);
+
+          // Buscar matrículas
+          const { data: enrollmentsData } = await supabase
+            .from("enrollments")
+            .select(
+              `
+              *,
+              courses (
+                title,
+                slug,
+                image_url,
+                duration_hours,
+                category
+              )
+            `
+            )
+            .eq("user_id", currentSession.user.id)
+            .order("enrolled_at", { ascending: false });
+
+          setEnrollments(enrollmentsData || []);
         }
       } catch (error) {
-        console.error("💥 Erro ao verificar sessão:", error);
+        console.error("💥 Erro ao buscar dados:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    checkSession();
+    fetchUserData();
 
-    // 🎯 LISTENER PARA MUDANÇAS DE AUTENTICAÇÃO
+    // Listener para mudanças de auth
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
 
       if (session) {
-        await fetchUserData(session.user.id);
+        await fetchUserData();
       } else {
         setEnrollments([]);
         setProfile(null);
@@ -94,42 +126,6 @@ export default function DashboardPage() {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  // 📊 BUSCAR DADOS DO USUÁRIO
-  const fetchUserData = async (userId: string) => {
-    try {
-      // Buscar perfil
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      setProfile(profileData);
-
-      // Buscar matrículas
-      const { data: enrollmentsData } = await supabase
-        .from("enrollments")
-        .select(
-          `
-          *,
-          courses (
-            title,
-            slug,
-            image_url,
-            duration_hours,
-            category
-          )
-        `
-        )
-        .eq("user_id", userId)
-        .order("enrolled_at", { ascending: false });
-
-      setEnrollments(enrollmentsData || []);
-    } catch (error) {
-      console.error("💥 Erro ao buscar dados:", error);
-    }
-  };
 
   // 🎯 CALCULAR ESTATÍSTICAS
   const totalCourses = enrollments?.length || 0;
@@ -143,21 +139,28 @@ export default function DashboardPage() {
       )
     : 0;
 
-  // 🔧 Nome de exibição
+  // 👤 DADOS DO USUÁRIO
   const displayName =
     profile?.full_name || session?.user?.email?.split("@")[0] || "Aluno";
+  const memberSince = session ? new Date(session.user.created_at) : new Date();
+  const now = new Date();
+  const monthsAsMember = Math.floor(
+    (now.getTime() - memberSince.getTime()) / (1000 * 60 * 60 * 24 * 30)
+  );
 
   // ⏳ LOADING STATE
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-6">
-          <Spinner size="lg" className="mx-auto" />
-          <div className="space-y-2">
-            <h2 className="text-3xl font-bold">Carregando Dashboard</h2>
-            <p className="text-muted-foreground text-lg">
-              Preparando sua experiência de aprendizado
-            </p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center space-y-6">
+            <Spinner size="lg" className="mx-auto" />
+            <div className="space-y-2">
+              <h2 className="text-3xl font-bold">Carregando Dashboard</h2>
+              <p className="text-muted-foreground text-lg">
+                Preparando sua experiência de aprendizado
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -167,7 +170,7 @@ export default function DashboardPage() {
   // 🔐 ACESSO NEGADO
   if (!session) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center">
         <div className="text-center space-y-8 max-w-md mx-auto p-8">
           <div className="text-7xl mb-4">🔐</div>
           <div className="space-y-4">
@@ -199,52 +202,162 @@ export default function DashboardPage() {
 
   // 🎉 DASHBOARD PRINCIPAL
   return (
-    <div className="min-h-screen bg-background">
-      {/* HEADER */}
-      <header className="border-b bg-background/95 backdrop-blur sticky top-0 z-30">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+      {/* HEADER DESTACADO */}
+      <header className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white shadow-2xl">
         <div className="container-custom">
-          <div className="flex h-20 items-center justify-between">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-              <p className="text-muted-foreground text-lg">
-                Bem-vindo,{" "}
-                <span className="font-semibold text-foreground">
-                  {displayName}
-                </span>
-                ! 👋
-              </p>
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between py-8 lg:py-12">
+            {/* INFORMAÇÕES DO USUÁRIO */}
+            <div className="flex items-start lg:items-center gap-6 mb-6 lg:mb-0">
+              {/* AVATAR GRANDE E DESTACADO */}
+              <div className="relative group">
+                <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-2xl border-4 border-white/30 shadow-2xl overflow-hidden bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm">
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt="Avatar"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500">
+                      <span className="text-2xl lg:text-3xl font-bold text-white">
+                        {displayName[0]?.toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* BADGE ONLINE */}
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 border-4 border-white rounded-full"></div>
+
+                {/* OVERLAY HOVER */}
+                <div className="absolute inset-0 bg-black/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Settings className="h-6 w-6 text-white" />
+                </div>
+              </div>
+
+              {/* INFORMAÇÕES DE TEXTO */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-2xl lg:text-4xl font-bold tracking-tight">
+                    Olá, {displayName}! 👋
+                  </h1>
+
+                  {/* BADGE DE DESTAQUE */}
+                  {profile?.role === "admin" && (
+                    <div className="inline-flex items-center gap-1 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold">
+                      <Crown className="h-3 w-3" />
+                      ADMIN
+                    </div>
+                  )}
+                  {profile?.role === "instructor" && (
+                    <div className="inline-flex items-center gap-1 bg-green-400 text-green-900 px-3 py-1 rounded-full text-sm font-bold">
+                      <Star className="h-3 w-3" />
+                      INSTRUTOR
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-4 text-blue-100">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span className="text-sm lg:text-base">
+                      Membro há {monthsAsMember}{" "}
+                      {monthsAsMember === 1 ? "mês" : "meses"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    <span className="text-sm lg:text-base">
+                      {totalCourses} {totalCourses === 1 ? "curso" : "cursos"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    <span className="text-sm lg:text-base">
+                      {completedCourses} concluídos
+                    </span>
+                  </div>
+                </div>
+
+                {/* MENSAGEM MOTIVACIONAL */}
+                <p className="text-blue-100 text-sm lg:text-base max-w-2xl">
+                  {completedCourses > 0
+                    ? "🎉 Continue assim! Seu progresso está incrível!"
+                    : totalCourses > 0
+                    ? "🚀 Sua jornada de aprendizado está apenas começando!"
+                    : "🌟 Prepare-se para transformar sua carreira!"}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Button asChild variant="outline" className="btn btn-secondary">
+
+            {/* AÇÕES RÁPIDAS */}
+            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+              <Button
+                asChild
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white btn-lg transition-all duration-300 hover:scale-105"
+              >
+                <Link href="/courses" className="flex items-center gap-3">
+                  <Rocket className="h-5 w-5" />
+                  Explorar Cursos
+                </Link>
+              </Button>
+
+              <Button
+                variant="outline"
+                className="bg-transparent hover:bg-white/10 border-white text-white btn-lg transition-all duration-300 hover:scale-105"
+                asChild
+              >
                 <Link
                   href="/dashboard/profile"
                   className="flex items-center gap-3"
                 >
-                  <User className="h-4 w-4" />
+                  <User className="h-5 w-5" />
                   Meu Perfil
-                </Link>
-              </Button>
-
-              <Button asChild className="btn btn-primary">
-                <Link href="/courses" className="flex items-center gap-3">
-                  <Rocket className="h-4 w-4" />
-                  Explorar Cursos
                 </Link>
               </Button>
             </div>
           </div>
         </div>
+
+        {/* ONDA DECORATIVA */}
+        <div className="w-full overflow-hidden">
+          <svg
+            viewBox="0 0 1200 120"
+            preserveAspectRatio="none"
+            className="w-full h-12 text-white fill-current"
+          >
+            <path
+              d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
+              opacity=".25"
+              className="shape-fill"
+            ></path>
+            <path
+              d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z"
+              opacity=".5"
+              className="shape-fill"
+            ></path>
+            <path
+              d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
+              className="shape-fill"
+            ></path>
+          </svg>
+        </div>
       </header>
 
-      <main className="container-custom py-12">
+      {/* CONTEÚDO PRINCIPAL */}
+      <main className="container-custom py-12 -mt-8 relative z-10">
         {/* 🎯 CARDS DE ESTATÍSTICAS */}
         <section className="mb-16">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold tracking-tight mb-4">
-              Sua Jornada de Aprendizado
+              Seu Progresso
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Acompanhe seu progresso e continue evoluindo na programação
+              Acompanhe sua evolução e conquistas na plataforma
             </p>
           </div>
 
@@ -256,6 +369,7 @@ export default function DashboardPage() {
               description="Matriculados"
               color="text-blue-600"
               bgColor="bg-blue-50 dark:bg-blue-900/20"
+              gradient="from-blue-500 to-blue-600"
             />
 
             <StatCard
@@ -265,6 +379,7 @@ export default function DashboardPage() {
               description="Cursos finalizados"
               color="text-green-600"
               bgColor="bg-green-50 dark:bg-green-900/20"
+              gradient="from-green-500 to-green-600"
             />
 
             <StatCard
@@ -274,6 +389,7 @@ export default function DashboardPage() {
               description="Cursando ativamente"
               color="text-orange-600"
               bgColor="bg-orange-50 dark:bg-orange-900/20"
+              gradient="from-orange-500 to-orange-600"
             />
 
             <StatCard
@@ -283,6 +399,7 @@ export default function DashboardPage() {
               description="Em todos os cursos"
               color="text-purple-600"
               bgColor="bg-purple-50 dark:bg-purple-900/20"
+              gradient="from-purple-500 to-purple-600"
             />
           </div>
         </section>
@@ -314,7 +431,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <Card className="text-center py-20 border-dashed">
+            <Card className="text-center py-20 border-dashed bg-white/50 backdrop-blur-sm">
               <CardContent className="space-y-8">
                 <div className="text-8xl mb-6">📚</div>
                 <div className="space-y-4">
@@ -340,7 +457,7 @@ export default function DashboardPage() {
   );
 }
 
-// 🎴 COMPONENTE: CARD DE ESTATÍSTICA
+// 🎴 COMPONENTE: CARD DE ESTATÍSTICA MELHORADO
 interface StatCardProps {
   icon: React.ReactNode;
   title: string;
@@ -348,6 +465,7 @@ interface StatCardProps {
   description: string;
   color: string;
   bgColor: string;
+  gradient: string;
 }
 
 function StatCard({
@@ -357,28 +475,33 @@ function StatCard({
   description,
   color,
   bgColor,
+  gradient,
 }: StatCardProps) {
   return (
-    <Card className="feature-card group hover-lift p-6">
+    <Card className="feature-card group hover-lift p-6 border-0 shadow-lg bg-white/70 backdrop-blur-sm">
       <CardContent className="p-0 space-y-6">
-        <div
-          className={`w-16 h-16 ${bgColor} rounded-2xl flex items-center justify-center ${color}`}
-        >
-          {icon}
+        <div className="flex items-center justify-between">
+          <div
+            className={`w-16 h-16 ${bgColor} rounded-2xl flex items-center justify-center ${color}`}
+          >
+            {icon}
+          </div>
+          <div
+            className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-full flex items-center justify-center text-white text-xl font-bold`}
+          >
+            {value}
+          </div>
         </div>
         <div className="space-y-2">
-          <div className="text-3xl font-bold text-foreground">{value}</div>
-          <div className="space-y-1">
-            <h3 className="font-semibold text-foreground text-lg">{title}</h3>
-            <p className="text-muted-foreground text-sm">{description}</p>
-          </div>
+          <h3 className="font-semibold text-foreground text-lg">{title}</h3>
+          <p className="text-muted-foreground text-sm">{description}</p>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-// 🎴 COMPONENTE: CARD DE CURSO
+// 🎴 COMPONENTE: CARD DE CURSO (mantido igual)
 interface CourseCardProps {
   enrollment: Enrollment;
 }
@@ -387,7 +510,7 @@ function CourseCard({ enrollment }: CourseCardProps) {
   const course = enrollment.courses;
 
   return (
-    <Card className="feature-card group hover-lift overflow-hidden">
+    <Card className="feature-card group hover-lift overflow-hidden bg-white/70 backdrop-blur-sm">
       <CardHeader className="pb-6">
         <div className="h-48 gradient-bg rounded-xl flex items-center justify-center mb-6 relative overflow-hidden">
           <span className="text-white text-5xl z-10">📚</span>
