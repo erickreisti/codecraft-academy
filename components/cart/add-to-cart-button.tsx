@@ -1,11 +1,4 @@
-// components/cart/add-to-cart-button.tsx - VERSÃO CORRIGIDA
-
-/**
- * BOTÃO ADICIONAR AO CARRINHO
- *
- * CORREÇÃO: Tipagem do image_url para aceitar string | null
- */
-
+// components/cart/add-to-cart-button.tsx - ARQUIVO COMPLETO CORRIGIDO
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -14,6 +7,7 @@ import { Course } from "@/types";
 import { ShoppingCart, Check, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 interface AddToCartButtonProps {
   course: Course;
@@ -36,14 +30,14 @@ export function AddToCartButton({
 
     setIsAdding(true);
 
+    // Simular delay de processamento
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    // CORREÇÃO: Converter null para undefined
     addItem({
       id: course.id,
       title: course.title,
       price: course.price,
-      image_url: course.image_url || undefined, // Converte null para undefined
+      image_url: course.image_url || undefined,
       slug: course.slug,
     });
 
@@ -58,7 +52,7 @@ export function AddToCartButton({
     setIsAdding(false);
   };
 
-  // Curso gratuito
+  // Curso gratuito - redireciona para a página do curso
   if (course.price === 0) {
     return (
       <Button
@@ -67,10 +61,10 @@ export function AddToCartButton({
         className={`w-full gap-2 ${className}`}
         asChild
       >
-        <a href={`/courses/${course.slug}`}>
+        <Link href={`/courses/${course.slug}`}>
           <Check className="h-4 w-4" />
           Acessar Gratuito
-        </a>
+        </Link>
       </Button>
     );
   }
@@ -90,7 +84,7 @@ export function AddToCartButton({
     );
   }
 
-  // Disponível para adicionar
+  // Disponível para adicionar ao carrinho
   return (
     <Button
       variant={variant}
@@ -100,11 +94,16 @@ export function AddToCartButton({
       className={`w-full gap-2 ${className}`}
     >
       {isAdding ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Adicionando...
+        </>
       ) : (
-        <ShoppingCart className="h-4 w-4" />
+        <>
+          <ShoppingCart className="h-4 w-4" />
+          Adicionar ao Carrinho
+        </>
       )}
-      {isAdding ? "Adicionando..." : "Adicionar ao Carrinho"}
     </Button>
   );
 }
