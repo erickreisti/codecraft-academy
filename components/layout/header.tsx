@@ -1,13 +1,4 @@
-// components/layout/header.tsx - VERSÃO CORRIGIDA
-
-/**
- * HEADER COM AUTENTICAÇÃO E CARRINHO - CodeCraft Academy
- *
- * Correções aplicadas:
- * - Removida propriedade 'user' não suportada pelo UserAvatar
- * - Corrigido conflito CSS no gradiente
- * - Mantidas todas as melhorias visuais e funcionais
- */
+// components/layout/header.tsx - VERSÃO SEM ÍCONES NOS LINKS
 
 "use client";
 
@@ -28,10 +19,6 @@ import {
   Monitor,
   Menu,
   Sparkles,
-  BookOpen,
-  FileText,
-  Users,
-  Home,
 } from "lucide-react";
 
 interface UserProfile {
@@ -151,11 +138,12 @@ export function Header() {
   const [isReady, setIsReady] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  // Links de navegação SEM ÍCONES
   const navigationItems = [
-    { href: "/", label: "Início", icon: Home },
-    { href: "/courses", label: "Cursos", icon: BookOpen },
-    { href: "/blog", label: "Blog", icon: FileText },
-    { href: "/about", label: "Sobre", icon: Users },
+    { href: "/", label: "Início" },
+    { href: "/courses", label: "Cursos" },
+    { href: "/blog", label: "Blog" },
+    { href: "/about", label: "Sobre" },
   ];
 
   useEffect(() => {
@@ -234,13 +222,10 @@ export function Header() {
     await supabase.auth.signOut();
   };
 
-  const displayName =
-    userProfile?.full_name || user?.email?.split("@")[0] || "Aluno";
-
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
       <div className="container-custom flex h-16 items-center justify-between">
-        {/* LOGO MELHORADA */}
+        {/* LOGO */}
         <Link
           href="/"
           className="flex items-center space-x-3 group flex-shrink-0"
@@ -258,26 +243,26 @@ export function Header() {
           </div>
         </Link>
 
-        {/* NAVEGAÇÃO PRINCIPAL - MELHORADA */}
-        <nav className="hidden md:flex items-center space-x-1">
+        {/* NAVEGAÇÃO PRINCIPAL - SEM ÍCONES */}
+        <nav className="hidden md:flex items-center space-x-8">
           {navigationItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground hover:text-primary transition-all duration-200 rounded-lg hover:bg-accent/50 group"
+              className="text-sm font-medium text-foreground hover:text-primary transition-all duration-200 relative py-2 group"
             >
-              <item.icon className="h-4 w-4 opacity-70 group-hover:opacity-100 transition-opacity" />
               {item.label}
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
             </Link>
           ))}
         </nav>
 
-        {/* ÁREA DE AÇÕES DO USUÁRIO - MELHORADA */}
+        {/* ÁREA DE AÇÕES DO USUÁRIO */}
         <div className="flex items-center space-x-2">
           {/* Toggle de tema */}
           <ThemeToggleWithDropdown />
 
-          {/* Botão do Carrinho - com loading state */}
+          {/* Botão do Carrinho */}
           {isReady ? (
             <Button
               variant="outline"
@@ -326,7 +311,7 @@ export function Header() {
                 </Button>
               </Link>
 
-              {/* Avatar do usuário - CORRIGIDO: removida propriedade 'user' */}
+              {/* Avatar do usuário */}
               <UserAvatar size="md" showName={true} />
 
               {/* Botão Sair */}
@@ -362,7 +347,7 @@ export function Header() {
             </div>
           )}
 
-          {/* MENU MOBILE MELHORADO */}
+          {/* MENU MOBILE */}
           <Button
             variant="outline"
             size="icon"
@@ -374,18 +359,17 @@ export function Header() {
         </div>
       </div>
 
-      {/* MENU MOBILE EXPANDIDO */}
+      {/* MENU MOBILE EXPANDIDO - SEM ÍCONES */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background/95 backdrop-blur animate-in slide-in-from-top duration-300">
-          <div className="container-custom py-4 space-y-3">
+          <div className="container-custom py-4 space-y-2">
             {navigationItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-foreground hover:text-primary transition-all duration-200 rounded-lg hover:bg-accent/50 border border-transparent hover:border-accent"
+                className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary transition-all duration-200 rounded-lg hover:bg-accent/50 border border-transparent hover:border-accent"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <item.icon className="h-4 w-4" />
                 {item.label}
               </Link>
             ))}
@@ -419,10 +403,9 @@ export function Header() {
                 <Link href="/dashboard" className="block w-full">
                   <Button
                     variant="outline"
-                    className="w-full justify-center gap-2"
+                    className="w-full justify-center"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <UserIcon className="h-4 w-4" />
                     Dashboard
                   </Button>
                 </Link>
@@ -442,7 +425,7 @@ export function Header() {
         </div>
       )}
 
-      {/* BORDER GRADIENT DECORATIVA CORRIGIDA */}
+      {/* BORDER GRADIENT DECORATIVA */}
       <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-purple-500/40"></div>
 
       {/* Sidebar do Carrinho */}
