@@ -73,7 +73,14 @@ export function CartSidebar() {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent className="w-full sm:max-w-md flex flex-col p-0 bg-background/95 backdrop-blur supports-backdrop-blur:bg-background/60">
+      <SheetContent
+        className="w-full sm:max-w-md flex flex-col p-0 bg-background/95 backdrop-blur supports-backdrop-blur:bg-background/60"
+        aria-describedby="cart-description"
+      >
+        <div id="cart-description" className="sr-only">
+          Sidebar do carrinho de compras contendo itens selecionados, resumo do
+          pedido e opções de finalização
+        </div>
         <SheetHeader className="px-6 py-4 border-b bg-gradient-to-r from-blue-50 to-purple-50 dark:from-gray-800 dark:to-purple-900/20">
           <div className="flex items-center justify-between">
             <SheetTitle className="flex items-center gap-2 text-foreground">
