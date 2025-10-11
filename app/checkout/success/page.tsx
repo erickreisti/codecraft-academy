@@ -1,10 +1,12 @@
-// app/checkout/success/page.tsx - VERSÃO MELHORADA
+// app/checkout/success/page.tsx - VERSÃO COMPLETA CORRIGIDA
+
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import {
@@ -19,73 +21,186 @@ import {
   Rocket,
   Gift,
   Shield,
+  Star,
+  Award,
+  PlayCircle,
+  BarChart3,
+  Calendar,
+  FileText,
 } from "lucide-react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import Image from "next/image";
+
+interface Course {
+  id: string;
+  title: string;
+  slug: string;
+  description?: string;
+  short_description?: string;
+  duration_hours?: number;
+  level?: string;
+  image_url?: string;
+  category?: string;
+  featured?: boolean;
+  published?: boolean;
+}
+
+interface OrderItem {
+  id: string;
+  course_id: string;
+  price: number;
+  quantity: number;
+  course?: Course;
+}
 
 interface OrderDetails {
   id: string;
   total_amount: number;
   created_at: string;
-  order_items: Array<{
-    courses: {
-      title: string;
-      slug: string;
-      duration_hours?: number;
-      level?: string;
-    };
-  }>;
+  coupon_code?: string;
+  discount_amount?: number;
+  order_items?: OrderItem[];
 }
+
+// Função para obter cor do nível - MOVIDA PARA FORA DO COMPONENTE
+const getLevelColor = (level: string) => {
+  switch (level?.toLowerCase()) {
+    case "iniciante":
+      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+    case "intermediario":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+    case "avancado":
+      return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300";
+    default:
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300";
+  }
+};
 
 export default function CheckoutSuccessPage() {
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
+  const [userName, setUserName] = useState<string>("");
   const searchParams = useSearchParams();
+  const router = useRouter();
   const orderId = searchParams.get("order");
 
   useEffect(() => {
     const fetchOrderAndUser = async () => {
-      if (!orderId) return;
+      if (!orderId) {
+        console.error("Nenhum ID de pedido fornecido");
+        toast.error("Pedido não encontrado");
+        setLoading(false);
+        return;
+      }
 
       try {
         // Buscar dados do usuário
         const {
           data: { user },
+          error: userError,
         } = await supabase.auth.getUser();
+        if (userError) {
+          console.error("Erro ao buscar usuário:", userError);
+        }
         if (user?.email) {
           setUserEmail(user.email);
         }
 
-        // Buscar dados do pedido
-        const { data, error } = await supabase
+        // Buscar perfil do usuário para o nome
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("full_name")
+            .eq("id", user.id)
+            .single();
+
+          if (profile?.full_name) {
+            setUserName(profile.full_name);
+          }
+        }
+
+        console.log("🔄 Buscando pedido:", orderId);
+
+        // 1. Primeiro buscar o pedido básico
+        const { data: orderData, error: orderError } = await supabase
           .from("orders")
-          .select(
-            `
-            *,
-            order_items (
-              courses (
-                title,
-                slug,
-                duration_hours,
-                level
-              )
-            )
-          `
-          )
+          .select("*")
           .eq("id", orderId)
           .single();
 
-        if (!error && data) {
-          setOrder(data);
-        } else {
-          console.error("Erro ao buscar pedido:", error);
+        if (orderError) {
+          console.error("❌ Erro ao buscar pedido:", orderError);
           toast.error("Não foi possível carregar os detalhes do pedido");
+          setLoading(false);
+          return;
+        }
+
+        if (!orderData) {
+          console.error("Pedido não encontrado");
+          toast.error("Pedido não encontrado");
+          setLoading(false);
+          return;
+        }
+
+        console.log("✅ Pedido encontrado:", orderData);
+
+        // 2. Buscar os itens do pedido
+        const { data: orderItems, error: itemsError } = await supabase
+          .from("order_items")
+          .select("*")
+          .eq("order_id", orderId);
+
+        if (itemsError) {
+          console.error("❌ Erro ao buscar itens do pedido:", itemsError);
+          toast.error("Erro ao carregar itens do pedido");
+          setLoading(false);
+          return;
+        }
+
+        console.log("✅ Itens do pedido:", orderItems);
+
+        // 3. Buscar detalhes COMPLETOS dos cursos
+        if (orderItems && orderItems.length > 0) {
+          const courseIds = orderItems.map((item) => item.course_id);
+
+          console.log("📚 IDs dos cursos:", courseIds);
+
+          const { data: coursesData, error: coursesError } = await supabase
+            .from("courses")
+            .select("*")
+            .in("id", courseIds);
+
+          if (coursesError) {
+            console.error("❌ Erro ao buscar cursos:", coursesError);
+            toast.error("Erro ao carregar detalhes dos cursos");
+          }
+
+          console.log("✅ Cursos encontrados:", coursesData);
+
+          // Combinar os dados
+          const orderWithItems: OrderDetails = {
+            ...orderData,
+            order_items: orderItems.map((item) => {
+              const course = coursesData?.find((c) => c.id === item.course_id);
+              console.log(`🔗 Vinculando curso ${item.course_id}:`, course);
+
+              return {
+                ...item,
+                course: course || undefined,
+              };
+            }),
+          };
+
+          setOrder(orderWithItems);
+        } else {
+          setOrder({ ...orderData, order_items: [] });
         }
       } catch (error) {
-        console.error("Erro:", error);
-        toast.error("Erro ao carregar informações");
+        console.error("💥 Erro completo:", error);
+        toast.error("Erro ao carregar informações do pedido");
       } finally {
         setLoading(false);
       }
@@ -93,6 +208,35 @@ export default function CheckoutSuccessPage() {
 
     fetchOrderAndUser();
   }, [orderId]);
+
+  // Função para debug - mostrar dados no console
+  useEffect(() => {
+    if (order) {
+      console.log("🎯 Dados finais do pedido:", order);
+      console.log("📦 Itens do pedido:", order.order_items);
+      order.order_items?.forEach((item, index) => {
+        console.log(`📖 Item ${index + 1}:`, item);
+        console.log(`📚 Curso do item ${index + 1}:`, item.course);
+      });
+    }
+  }, [order]);
+
+  // Função para redirecionar se não tiver orderId
+  useEffect(() => {
+    if (!orderId && !loading) {
+      toast.error("Pedido não encontrado");
+      router.push("/dashboard/courses");
+    }
+  }, [orderId, loading, router]);
+
+  // Calcular totais - COM VERIFICAÇÃO DE NULL
+  const subtotal =
+    order?.order_items?.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    ) || 0;
+  const discount = order?.discount_amount || 0;
+  const total = order?.total_amount || 0;
 
   if (loading) {
     return (
@@ -169,7 +313,7 @@ export default function CheckoutSuccessPage() {
       {/* Hero Section de Sucesso */}
       <section className="py-16 lg:py-20 bg-gradient-to-br from-green-50 via-white to-blue-50 dark:from-green-900/20 dark:via-gray-800 dark:to-blue-900/20">
         <div className="container-custom">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             {/* Ícone e Mensagem Principal */}
             <div className="text-center mb-12">
               <div className="relative inline-block mb-6">
@@ -183,192 +327,357 @@ export default function CheckoutSuccessPage() {
                 </div>
               </div>
 
-              <h1 className="text-4xl lg:text-5xl font-bold mb-6">
-                Parabéns! Compra Realizada com Sucesso 🎉
+              <h1 className="text-4xl lg:text-5xl font-bold mb-4">
+                Parabéns{userName ? `, ${userName.split(" ")[0]}` : ""}! 🎉
               </h1>
-              <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                Seu pedido foi processado e agora você tem acesso completo aos
-                cursos. Prepare-se para transformar sua carreira!
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto mb-6">
+                Sua compra foi processada com sucesso! Agora você tem acesso
+                vitalício aos cursos selecionados.
               </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Badge variant="secondary" className="text-sm py-2 px-4">
+                  <Calendar className="h-4 w-4 mr-2" />
+                  {new Date(order.created_at).toLocaleDateString("pt-BR", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Badge>
+                <Badge variant="outline" className="text-sm py-2 px-4">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Pedido: {order.id.slice(0, 8).toUpperCase()}
+                </Badge>
+              </div>
             </div>
 
-            {/* Grid de Informações */}
+            {/* Grid Principal */}
             <div className="grid lg:grid-cols-3 gap-8 mb-12">
               {/* Detalhes do Pedido */}
-              <Card className="border-0 shadow-lg">
-                <CardContent className="pt-6">
-                  <h3 className="font-semibold mb-4 flex items-center gap-2">
-                    <Shield className="h-5 w-5 text-blue-600" />
-                    Detalhes do Pedido
-                  </h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Número:</span>
-                      <span className="font-mono font-medium">
-                        {order.id.slice(0, 8)}...
-                      </span>
+              <div className="space-y-6">
+                <Card className="border-0 shadow-lg">
+                  <CardContent className="pt-6">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <Shield className="h-5 w-5 text-blue-600" />
+                      Resumo do Pedido
+                    </h3>
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Subtotal:</span>
+                        <span>R$ {subtotal.toFixed(2)}</span>
+                      </div>
+
+                      {order.coupon_code && (
+                        <div className="flex justify-between text-green-600">
+                          <span>Cupom ({order.coupon_code}):</span>
+                          <span>- R$ {discount.toFixed(2)}</span>
+                        </div>
+                      )}
+
+                      <div className="border-t pt-3">
+                        <div className="flex justify-between text-lg font-bold">
+                          <span>Total:</span>
+                          <span className="text-primary">
+                            R$ {total.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Itens:</span>
+                          <span>{order.order_items?.length || 0} curso(s)</span>
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Status:</span>
+                          <span className="text-green-600 font-medium">
+                            ✅ Concluído
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Total:</span>
-                      <span className="font-bold text-primary text-lg">
-                        R$ {order.total_amount.toFixed(2)}
-                      </span>
+                  </CardContent>
+                </Card>
+
+                {/* Acesso Rápido */}
+                <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+                  <CardContent className="pt-6">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <Rocket className="h-5 w-5 text-purple-600" />
+                      Acesso Rápido
+                    </h3>
+                    <div className="space-y-3">
+                      <Button
+                        asChild
+                        className="w-full justify-start"
+                        variant="outline"
+                      >
+                        <Link
+                          href="/dashboard/courses"
+                          className="flex items-center gap-3"
+                        >
+                          <BookOpen className="h-4 w-4" />
+                          Meus Cursos
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        className="w-full justify-start"
+                        variant="outline"
+                      >
+                        <Link
+                          href="/dashboard"
+                          className="flex items-center gap-3"
+                        >
+                          <BarChart3 className="h-4 w-4" />
+                          Dashboard
+                        </Link>
+                      </Button>
+                      <Button
+                        asChild
+                        className="w-full justify-start"
+                        variant="outline"
+                      >
+                        <Link
+                          href="/profile"
+                          className="flex items-center gap-3"
+                        >
+                          <Award className="h-4 w-4" />
+                          Meu Perfil
+                        </Link>
+                      </Button>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Data:</span>
-                      <span className="font-medium">
-                        {new Date(order.created_at).toLocaleDateString(
-                          "pt-BR",
-                          {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          }
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Status:</span>
-                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-medium">
-                        ✅ Concluído
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
 
               {/* Cursos Adquiridos */}
               <Card className="lg:col-span-2 border-0 shadow-lg">
                 <CardContent className="pt-6">
-                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                  <h3 className="font-semibold mb-6 flex items-center gap-2">
                     <Gift className="h-5 w-5 text-purple-600" />
                     Seus Novos Cursos ({order.order_items?.length || 0})
                   </h3>
-                  <div className="space-y-4">
-                    {order.order_items?.map((item, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-4 p-4 rounded-lg border bg-white/50 dark:bg-gray-800/50"
-                      >
-                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">
-                          {item.courses.title[0]}
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-foreground text-sm">
-                            {item.courses.title}
-                          </h4>
-                          <div className="flex items-center gap-4 mt-1 text-xs text-muted-foreground">
-                            {item.courses.duration_hours && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                <span>{item.courses.duration_hours}h</span>
+                  <div className="space-y-6">
+                    {order.order_items?.map((item, index) => {
+                      const course = item.course;
+                      console.log(`🎨 Renderizando curso ${index}:`, course);
+
+                      return (
+                        <div
+                          key={index}
+                          className="flex flex-col sm:flex-row gap-4 p-6 rounded-xl border-2 border-green-200 dark:border-green-800 bg-gradient-to-r from-green-50 to-white dark:from-green-900/10 dark:to-gray-800/50"
+                        >
+                          {/* Imagem do Curso */}
+                          <div className="flex-shrink-0">
+                            <div className="w-24 h-24 rounded-lg overflow-hidden border bg-white dark:bg-gray-700">
+                              {course?.image_url ? (
+                                <Image
+                                  src={course.image_url}
+                                  alt={course.title || "Curso"}
+                                  width={96}
+                                  height={96}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                                  {course?.title?.[0] || "C"}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Informações do Curso */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                              <div>
+                                <h4 className="font-bold text-lg text-foreground mb-1">
+                                  {course?.title || "Título não disponível"}
+                                </h4>
+                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                  {course?.short_description ||
+                                    course?.description ||
+                                    "Descrição não disponível"}
+                                </p>
                               </div>
-                            )}
-                            {item.courses.level && (
-                              <div className="flex items-center gap-1">
-                                <Users className="h-3 w-3" />
-                                <span className="capitalize">
-                                  {item.courses.level}
-                                </span>
+                              <div className="text-right">
+                                <div className="font-bold text-primary text-lg mb-1">
+                                  R$ {(item.price * item.quantity).toFixed(2)}
+                                </div>
+                                {item.quantity > 1 && (
+                                  <div className="text-xs text-muted-foreground">
+                                    {item.quantity}x R$ {item.price.toFixed(2)}
+                                  </div>
+                                )}
                               </div>
-                            )}
+                            </div>
+
+                            {/* Metadados do Curso */}
+                            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-4">
+                              {course?.duration_hours && (
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>
+                                    {course.duration_hours}h de conteúdo
+                                  </span>
+                                </div>
+                              )}
+                              {course?.level && (
+                                <Badge
+                                  variant="outline"
+                                  className={getLevelColor(course.level)}
+                                >
+                                  {course.level}
+                                </Badge>
+                              )}
+                              {course?.category && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {course.category}
+                                </Badge>
+                              )}
+                            </div>
+
+                            {/* Ações do Curso */}
+                            <div className="flex flex-wrap gap-3">
+                              <Button
+                                asChild
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <Link
+                                  href={`/courses/${course?.slug || "#"}`}
+                                  className="flex items-center gap-2"
+                                >
+                                  <PlayCircle className="h-4 w-4" />
+                                  Começar a Estudar
+                                </Link>
+                              </Button>
+                              <Button asChild variant="outline" size="sm">
+                                <Link
+                                  href={`/courses/${
+                                    course?.slug || "#"
+                                  }/content`}
+                                  className="flex items-center gap-2"
+                                >
+                                  <BookOpen className="h-4 w-4" />
+                                  Ver Conteúdo
+                                </Link>
+                              </Button>
+                            </div>
                           </div>
                         </div>
-                        <Button asChild variant="outline" size="sm">
-                          <Link
-                            href={`/courses/${item.courses.slug}`}
-                            className="flex items-center gap-2"
-                          >
-                            Acessar
-                            <ArrowRight className="h-3 w-3" />
-                          </Link>
-                        </Button>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Benefícios e Próximos Passos */}
+            <div className="grid lg:grid-cols-2 gap-8 mb-12">
+              {/* Benefícios Inclusos */}
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20">
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <Star className="h-5 w-5 text-yellow-600" />
+                    Benefícios Inclusos
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    {[
+                      { icon: Award, text: "Certificado de conclusão" },
+                      { icon: Download, text: "Acesso vitalício" },
+                      { icon: Clock, text: "Atualizações gratuitas" },
+                      { icon: Users, text: "Comunidade exclusiva" },
+                      { icon: Mail, text: "Suporte dos instrutores" },
+                      { icon: Shield, text: "Garantia de 7 dias" },
+                    ].map((benefit, index) => (
+                      <div key={index} className="flex items-center gap-3">
+                        <benefit.icon className="h-4 w-4 text-green-600 flex-shrink-0" />
+                        <span className="text-foreground">{benefit.text}</span>
                       </div>
                     ))}
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Próximos Passos */}
+              <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20">
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold mb-4 flex items-center gap-2">
+                    <Sparkles className="h-5 w-5 text-purple-600" />
+                    Próximos Passos
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold mt-0.5 flex-shrink-0">
+                        1
+                      </div>
+                      <div>
+                        <div className="font-medium text-foreground">
+                          Acesse seus cursos
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Vá para "Meus Cursos" no dashboard
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-bold mt-0.5 flex-shrink-0">
+                        2
+                      </div>
+                      <div>
+                        <div className="font-medium text-foreground">
+                          Configure seu perfil
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Complete seu perfil para melhor experiência
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold mt-0.5 flex-shrink-0">
+                        3
+                      </div>
+                      <div>
+                        <div className="font-medium text-foreground">
+                          Participe da comunidade
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Interaja com outros alunos e instrutores
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Ações Principais */}
-            <div className="text-center mb-12">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-                <Button
-                  asChild
-                  size="lg"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            {/* Ação Principal */}
+            <div className="text-center">
+              <Button
+                asChild
+                size="lg"
+                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-6 px-8 text-lg shadow-xl hover:shadow-2xl transition-all duration-300"
+              >
+                <Link
+                  href="/dashboard/courses"
+                  className="flex items-center gap-3"
                 >
-                  <Link
-                    href="/dashboard/courses"
-                    className="flex items-center gap-3"
-                  >
-                    <BookOpen className="h-5 w-5" />
-                    Acessar Meus Cursos
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-
-                <Button asChild variant="outline" size="lg">
-                  <Link href="/courses" className="flex items-center gap-3">
-                    <Rocket className="h-5 w-5" />
-                    Continuar Explorando
-                  </Link>
-                </Button>
-              </div>
-
-              {/* Informações de Acesso */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-2xl mx-auto">
-                <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border">
-                  <Mail className="h-6 w-6 text-blue-600" />
-                  <div className="text-left">
-                    <div className="font-medium text-sm">Email enviado</div>
-                    <div className="text-xs text-muted-foreground">
-                      Confirmação para {userEmail || "seu email"}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border">
-                  <Download className="h-6 w-6 text-green-600" />
-                  <div className="text-left">
-                    <div className="font-medium text-sm">Acesso Imediato</div>
-                    <div className="text-xs text-muted-foreground">
-                      Comece a aprender agora
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-4 bg-white dark:bg-gray-800 rounded-lg border">
-                  <CheckCircle2 className="h-6 w-6 text-purple-600" />
-                  <div className="text-left">
-                    <div className="font-medium text-sm">Certificado</div>
-                    <div className="text-xs text-muted-foreground">
-                      Incluso em todos os cursos
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Dica Final */}
-            <div className="text-center p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-blue-200 dark:border-blue-800">
-              <div className="flex items-center justify-center gap-3 mb-3">
-                <Sparkles className="h-6 w-6 text-blue-600" />
-                <h4 className="font-semibold text-blue-800 dark:text-blue-200">
-                  Próximos Passos
-                </h4>
-              </div>
-              <p className="text-blue-700 dark:text-blue-300 text-sm">
-                Acesse seu dashboard para acompanhar seu progresso, baixar
-                materiais e interagir com a comunidade. Seu sucesso é nossa
-                prioridade! 🚀
+                  <BookOpen className="h-6 w-6" />
+                  Acessar Área de Membros
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
+              </Button>
+              <p className="text-muted-foreground mt-4 text-sm">
+                Seu acesso está liberado! Comece sua jornada de aprendizado
+                agora mesmo.
               </p>
             </div>
           </div>
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }
