@@ -156,7 +156,24 @@ export function Header() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
   // Store do carrinho
-  const { getItemCount, setIsOpen } = useCartStore();
+  const { getItemCount, setIsOpen, syncState } = useCartStore();
+
+  // NOVO EFFECT: Sincronizar carrinho entre abas
+  useEffect(() => {
+    // Sincroniza ao montar
+    syncState();
+
+    // Listener para sincronização automática
+    const handleStorageSync = () => {
+      syncState();
+    };
+
+    window.addEventListener("storage", handleStorageSync);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageSync);
+    };
+  }, [syncState]);
 
   /**
    * EFFECT PARA GERENCIAR AUTENTICAÇÃO E PERFIL
