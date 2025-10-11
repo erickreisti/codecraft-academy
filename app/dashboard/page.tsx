@@ -1,4 +1,4 @@
-// app/dashboard/page.tsx - VERSÃO COM HEADER DESTACADO
+// app/dashboard/page.tsx - VERSÃO COM HEADER DESTACADO E MELHORIAS
 "use client";
 
 import { useState, useEffect } from "react";
@@ -151,16 +151,16 @@ export default function DashboardPage() {
   // ⏳ LOADING STATE
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center space-y-6">
-            <Spinner size="lg" className="mx-auto" />
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold">Carregando Dashboard</h2>
-              <p className="text-muted-foreground text-lg">
-                Preparando sua experiência de aprendizado
-              </p>
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center">
+        <div className="text-center space-y-6">
+          <Spinner size="lg" className="mx-auto" />
+          <div className="space-y-2">
+            <h2 className="text-3xl font-bold text-foreground dark:text-white">
+              Carregando Dashboard
+            </h2>
+            <p className="text-muted-foreground text-lg dark:text-gray-300">
+              Preparando sua experiência de aprendizado
+            </p>
           </div>
         </div>
       </div>
@@ -174,8 +174,10 @@ export default function DashboardPage() {
         <div className="text-center space-y-8 max-w-md mx-auto p-8">
           <div className="text-7xl mb-4">🔐</div>
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold">Acesso não autorizado</h2>
-            <p className="text-muted-foreground text-lg leading-relaxed">
+            <h2 className="text-3xl font-bold text-foreground dark:text-white">
+              Acesso não autorizado
+            </h2>
+            <p className="text-muted-foreground text-lg leading-relaxed dark:text-gray-300">
               Você precisa estar logado para acessar o dashboard.
             </p>
           </div>
@@ -189,7 +191,11 @@ export default function DashboardPage() {
                 Fazer Login
               </Link>
             </Button>
-            <Button asChild variant="outline" className="w-full btn-lg">
+            <Button
+              asChild
+              variant="outline"
+              className="w-full btn-lg dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+            >
               <Link href="/" className="flex items-center gap-2 justify-center">
                 ← Voltar para Home
               </Link>
@@ -204,14 +210,14 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
       {/* HEADER DESTACADO */}
-      <header className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white shadow-2xl">
+      <header className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 text-white shadow-2xl dark:from-gray-800 dark:via-purple-900 dark:to-gray-800">
         <div className="container-custom">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between py-8 lg:py-12">
             {/* INFORMAÇÕES DO USUÁRIO */}
             <div className="flex items-start lg:items-center gap-6 mb-6 lg:mb-0">
-              {/* AVATAR GRANDE E DESTACADO */}
+              {/* AVATAR SIMPLES E ARREDONDADO - SEM BORDA */}
               <div className="relative group">
-                <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-2xl border-4 border-white/30 shadow-2xl overflow-hidden bg-gradient-to-br from-white/20 to-white/10 backdrop-blur-sm">
+                <div className="w-20 h-20 lg:w-24 lg:h-24 rounded-full overflow-hidden bg-gradient-to-br from-blue-400 to-purple-500 shadow-2xl">
                   {profile?.avatar_url ? (
                     <img
                       src={profile.avatar_url}
@@ -222,7 +228,7 @@ export default function DashboardPage() {
                       }}
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-400 to-purple-500">
+                    <div className="w-full h-full flex items-center justify-center">
                       <span className="text-2xl lg:text-3xl font-bold text-white">
                         {displayName[0]?.toUpperCase()}
                       </span>
@@ -231,10 +237,10 @@ export default function DashboardPage() {
                 </div>
 
                 {/* BADGE ONLINE */}
-                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 border-4 border-white rounded-full"></div>
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-400 border-4 border-white dark:border-gray-800 rounded-full"></div>
 
                 {/* OVERLAY HOVER */}
-                <div className="absolute inset-0 bg-black/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/20 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <Settings className="h-6 w-6 text-white" />
                 </div>
               </div>
@@ -261,7 +267,7 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                <div className="flex flex-wrap items-center gap-4 text-blue-100">
+                <div className="flex flex-wrap items-center gap-4 text-blue-100 dark:text-blue-200">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     <span className="text-sm lg:text-base">
@@ -284,7 +290,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* MENSAGEM MOTIVACIONAL */}
-                <p className="text-blue-100 text-sm lg:text-base max-w-2xl">
+                <p className="text-blue-100 dark:text-blue-200 text-sm lg:text-base max-w-2xl">
                   {completedCourses > 0
                     ? "🎉 Continue assim! Seu progresso está incrível!"
                     : totalCourses > 0
@@ -298,7 +304,7 @@ export default function DashboardPage() {
             <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
               <Button
                 asChild
-                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white btn-lg transition-all duration-300 hover:scale-105"
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm border border-white/30 text-white btn-lg transition-all duration-300 hover:scale-105 dark:bg-white/10 dark:border-white/20"
               >
                 <Link href="/courses" className="flex items-center gap-3">
                   <Rocket className="h-5 w-5" />
@@ -308,7 +314,7 @@ export default function DashboardPage() {
 
               <Button
                 variant="outline"
-                className="bg-transparent hover:bg-white/10 border-white text-white btn-lg transition-all duration-300 hover:scale-105"
+                className="bg-transparent hover:bg-white/10 border-white text-white btn-lg transition-all duration-300 hover:scale-105 dark:border-white/30 dark:hover:bg-white/20"
                 asChild
               >
                 <Link
@@ -328,7 +334,7 @@ export default function DashboardPage() {
           <svg
             viewBox="0 0 1200 120"
             preserveAspectRatio="none"
-            className="w-full h-12 text-white fill-current"
+            className="w-full h-12 text-white fill-current dark:text-gray-800"
           >
             <path
               d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
@@ -353,10 +359,10 @@ export default function DashboardPage() {
         {/* 🎯 CARDS DE ESTATÍSTICAS */}
         <section className="mb-16">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold tracking-tight mb-4">
+            <h2 className="text-4xl font-bold tracking-tight text-foreground dark:text-white">
               Seu Progresso
             </h2>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed dark:text-gray-300">
               Acompanhe sua evolução e conquistas na plataforma
             </p>
           </div>
@@ -367,7 +373,7 @@ export default function DashboardPage() {
               title="Total de Cursos"
               value={totalCourses}
               description="Matriculados"
-              color="text-blue-600"
+              color="text-blue-600 dark:text-blue-400"
               bgColor="bg-blue-50 dark:bg-blue-900/20"
               gradient="from-blue-500 to-blue-600"
             />
@@ -377,7 +383,7 @@ export default function DashboardPage() {
               title="Concluídos"
               value={completedCourses}
               description="Cursos finalizados"
-              color="text-green-600"
+              color="text-green-600 dark:text-green-400"
               bgColor="bg-green-50 dark:bg-green-900/20"
               gradient="from-green-500 to-green-600"
             />
@@ -387,7 +393,7 @@ export default function DashboardPage() {
               title="Em Andamento"
               value={inProgressCourses}
               description="Cursando ativamente"
-              color="text-orange-600"
+              color="text-orange-600 dark:text-orange-400"
               bgColor="bg-orange-50 dark:bg-orange-900/20"
               gradient="from-orange-500 to-orange-600"
             />
@@ -397,7 +403,7 @@ export default function DashboardPage() {
               title="Progresso Médio"
               value={`${averageProgress}%`}
               description="Em todos os cursos"
-              color="text-purple-600"
+              color="text-purple-600 dark:text-purple-400"
               bgColor="bg-purple-50 dark:bg-purple-900/20"
               gradient="from-purple-500 to-purple-600"
             />
@@ -408,12 +414,18 @@ export default function DashboardPage() {
         <section className="space-y-12">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tight">Meus Cursos</h2>
-              <p className="text-muted-foreground text-lg">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground dark:text-white">
+                Meus Cursos
+              </h2>
+              <p className="text-muted-foreground text-lg dark:text-gray-300">
                 Continue de onde parou ou explore novos conteúdos
               </p>
             </div>
-            <Button variant="outline" asChild className="group btn-lg">
+            <Button
+              variant="outline"
+              asChild
+              className="group btn-lg dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-800"
+            >
               <Link
                 href="/dashboard/courses"
                 className="flex items-center gap-3"
@@ -431,14 +443,14 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <Card className="text-center py-20 border-dashed bg-white/50 backdrop-blur-sm">
+            <Card className="text-center py-20 border-dashed bg-white/50 backdrop-blur-sm dark:bg-gray-800/50 dark:border-gray-700">
               <CardContent className="space-y-8">
                 <div className="text-8xl mb-6">📚</div>
                 <div className="space-y-4">
-                  <h3 className="text-3xl font-bold text-foreground">
+                  <h3 className="text-3xl font-bold text-foreground dark:text-white">
                     Nenhum curso matriculado
                   </h3>
-                  <p className="text-muted-foreground text-xl max-w-md mx-auto leading-relaxed">
+                  <p className="text-muted-foreground text-xl max-w-md mx-auto leading-relaxed dark:text-gray-300">
                     Sua jornada em programação está prestes a começar!
                   </p>
                 </div>
@@ -478,7 +490,7 @@ function StatCard({
   gradient,
 }: StatCardProps) {
   return (
-    <Card className="feature-card group hover-lift p-6 border-0 shadow-lg bg-white/70 backdrop-blur-sm">
+    <Card className="feature-card group hover-lift p-6 border-0 shadow-lg bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 dark:border-gray-700">
       <CardContent className="p-0 space-y-6">
         <div className="flex items-center justify-between">
           <div
@@ -493,15 +505,19 @@ function StatCard({
           </div>
         </div>
         <div className="space-y-2">
-          <h3 className="font-semibold text-foreground text-lg">{title}</h3>
-          <p className="text-muted-foreground text-sm">{description}</p>
+          <h3 className="font-semibold text-foreground text-lg dark:text-white">
+            {title}
+          </h3>
+          <p className="text-muted-foreground text-sm dark:text-gray-300">
+            {description}
+          </p>
         </div>
       </CardContent>
     </Card>
   );
 }
 
-// 🎴 COMPONENTE: CARD DE CURSO (mantido igual)
+// 🎴 COMPONENTE: CARD DE CURSO
 interface CourseCardProps {
   enrollment: Enrollment;
 }
@@ -510,7 +526,7 @@ function CourseCard({ enrollment }: CourseCardProps) {
   const course = enrollment.courses;
 
   return (
-    <Card className="feature-card group hover-lift overflow-hidden bg-white/70 backdrop-blur-sm">
+    <Card className="feature-card group hover-lift overflow-hidden bg-white/70 backdrop-blur-sm dark:bg-gray-800/70 dark:border-gray-700">
       <CardHeader className="pb-6">
         <div className="h-48 gradient-bg rounded-xl flex items-center justify-center mb-6 relative overflow-hidden">
           <span className="text-white text-5xl z-10">📚</span>
@@ -540,13 +556,13 @@ function CourseCard({ enrollment }: CourseCardProps) {
           </div>
         </div>
 
-        <CardTitle className="text-xl leading-tight line-clamp-2 group-hover:text-primary transition-colors min-h-[3rem]">
+        <CardTitle className="text-xl leading-tight line-clamp-2 group-hover:text-primary transition-colors min-h-[3rem] dark:text-white">
           {course?.title || "Curso"}
         </CardTitle>
 
         {course?.category && (
-          <CardDescription className="flex items-center gap-2 text-sm">
-            <span className="bg-muted px-2 py-1 rounded-md">
+          <CardDescription className="flex items-center gap-2 text-sm dark:text-gray-300">
+            <span className="bg-muted px-2 py-1 rounded-md dark:bg-gray-700">
               {course.category}
             </span>
             <span>•</span>
@@ -558,13 +574,13 @@ function CourseCard({ enrollment }: CourseCardProps) {
       <CardContent className="space-y-6">
         {!enrollment.completed && enrollment.progress > 0 && (
           <div className="space-y-3">
-            <div className="flex justify-between text-sm text-muted-foreground">
+            <div className="flex justify-between text-sm text-muted-foreground dark:text-gray-300">
               <span>Seu progresso</span>
-              <span className="font-semibold text-foreground">
+              <span className="font-semibold text-foreground dark:text-white">
                 {enrollment.progress}%
               </span>
             </div>
-            <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden">
+            <div className="w-full bg-muted rounded-full h-2.5 overflow-hidden dark:bg-gray-700">
               <div
                 className="bg-primary h-2.5 rounded-full transition-all duration-700 ease-out"
                 style={{ width: `${enrollment.progress}%` }}
@@ -600,7 +616,7 @@ function CourseCard({ enrollment }: CourseCardProps) {
           </Link>
         </Button>
 
-        <div className="flex justify-between items-center text-sm text-muted-foreground pt-4 border-t">
+        <div className="flex justify-between items-center text-sm text-muted-foreground pt-4 border-t dark:text-gray-400 dark:border-gray-600">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
             <span>
@@ -609,7 +625,7 @@ function CourseCard({ enrollment }: CourseCardProps) {
             </span>
           </div>
           {enrollment.completed && enrollment.completed_at && (
-            <div className="flex items-center gap-2 text-green-600">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
               <CheckCircle className="h-4 w-4" />
               <span>
                 {new Date(enrollment.completed_at).toLocaleDateString("pt-BR")}
