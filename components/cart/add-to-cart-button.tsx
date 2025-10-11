@@ -39,6 +39,9 @@ export function AddToCartButton({
       price: course.price,
       image_url: course.image_url || undefined,
       slug: course.slug,
+      duration_hours: course.duration_hours,
+      level: course.level,
+      category: course.category,
     });
 
     toast.success("Curso adicionado ao carrinho!", {

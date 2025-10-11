@@ -9,6 +9,9 @@ export interface CartItem {
   image_url?: string;
   slug: string;
   quantity: number;
+  duration_hours?: number;
+  level?: string;
+  category?: string;
 }
 
 interface CartStore {
