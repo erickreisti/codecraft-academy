@@ -27,18 +27,16 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers>
-          <ClientOnly>
-            <div className="min-h-screen flex flex-col">
-              {children}
-              <Footer />
-              <Toaster
-                position="top-right"
-                duration={3000}
-                closeButton
-                richColors
-              />
-            </div>
-          </ClientOnly>
+          <div className="min-h-screen flex flex-col">
+            {children}
+            <Footer />
+            <Toaster
+              position="top-right"
+              duration={3000}
+              closeButton
+              richColors
+            />
+          </div>
         </Providers>
       </body>
     </html>

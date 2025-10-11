@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Header } from "@/components/layout/header";
-import { createCourse } from "@/app/actions/course-actions";
+import { createCourse } from "@/app/actions/admin-actions";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";

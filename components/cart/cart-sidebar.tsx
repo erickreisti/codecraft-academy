@@ -14,7 +14,6 @@ import { Minus, Plus, ShoppingCart, X, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { CourseImage } from "@/components/ui/course-image";
-import type { CartItem } from "@/lib/stores/cart-store";
 
 export function CartSidebar() {
   const {
@@ -28,27 +27,21 @@ export function CartSidebar() {
     setIsOpen,
   } = useCartStore();
 
-  const handleRemoveItem = (item: CartItem) => {
+  const handleRemoveItem = (item: any) => {
     removeItem(item.id);
-    toast.success("Item removido do carrinho", {
-      description: `"${item.title}" foi removido.`,
-    });
+    toast.success("Item removido do carrinho");
   };
 
   const handleClearCart = () => {
     if (items.length === 0) return;
     clearCart();
-    toast.info("Carrinho limpo", {
-      description: "Todos os itens foram removidos.",
-    });
+    toast.info("Carrinho limpo");
   };
 
   const handleQuantityChange = (id: string, newQuantity: number) => {
     if (newQuantity < 1) {
-      const itemToRemove = items.find((item) => item.id === id);
-      if (itemToRemove) {
-        handleRemoveItem(itemToRemove);
-      }
+      const itemToRemove = items.find((item: any) => item.id === id);
+      if (itemToRemove) handleRemoveItem(itemToRemove);
       return;
     }
     updateQuantity(id, newQuantity);
@@ -89,12 +82,11 @@ export function CartSidebar() {
             <>
               <ScrollArea className="flex-1">
                 <div className="p-6 space-y-4">
-                  {items.map((item) => (
+                  {items.map((item: any) => (
                     <div
                       key={item.id}
                       className="flex items-start gap-3 border rounded-lg p-3 group hover:border-primary/50 transition-colors"
                     >
-                      {/* CONTAINER DA IMAGEM */}
                       <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden">
                         <CourseImage
                           src={item.image_url}
@@ -102,8 +94,6 @@ export function CartSidebar() {
                           className="w-12 h-12"
                         />
                       </div>
-
-                      {/* INFORMAÇÕES DO ITEM */}
                       <div className="flex-1 min-w-0 space-y-2">
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="font-medium text-sm line-clamp-2 leading-tight">
@@ -118,11 +108,9 @@ export function CartSidebar() {
                             <X className="h-3 w-3" />
                           </Button>
                         </div>
-
                         <p className="text-sm font-semibold text-primary">
                           R$ {item.price.toFixed(2)}
                         </p>
-
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1">
                             <Button
@@ -135,11 +123,9 @@ export function CartSidebar() {
                             >
                               <Minus className="h-3 w-3" />
                             </Button>
-
                             <span className="text-sm font-medium w-8 text-center">
                               {item.quantity}
                             </span>
-
                             <Button
                               variant="outline"
                               size="icon"
@@ -151,7 +137,6 @@ export function CartSidebar() {
                               <Plus className="h-3 w-3" />
                             </Button>
                           </div>
-
                           <div className="text-sm font-medium">
                             R$ {(item.price * item.quantity).toFixed(2)}
                           </div>
@@ -168,7 +153,6 @@ export function CartSidebar() {
                     <span>Subtotal:</span>
                     <span>R$ {getTotal().toFixed(2)}</span>
                   </div>
-
                   <div className="border-t pt-2">
                     <div className="flex justify-between items-center text-lg font-semibold">
                       <span>Total:</span>
@@ -185,7 +169,6 @@ export function CartSidebar() {
                       Finalizar Compra
                     </Link>
                   </Button>
-
                   <Button
                     variant="outline"
                     className="w-full gap-2 text-muted-foreground hover:text-destructive"

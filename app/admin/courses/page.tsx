@@ -8,7 +8,7 @@ import { supabase } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
-import { getAdminCourses, deleteCourse } from "@/app/actions/course-actions";
+import { getAdminCourses, deleteCourse } from "@/app/actions/admin-actions";
 import { toast } from "sonner";
 
 interface Course {

@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { updateProfile, getProfile } from "@/app/actions/profile-actions";
+import { updateProfile, getProfile } from "@/app/actions/admin-actions";
 import { Session } from "@supabase/supabase-js";
 import { Spinner } from "@/components/ui/spinner";
 

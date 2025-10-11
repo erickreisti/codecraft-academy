@@ -20,7 +20,7 @@ import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import Link from "next/link";
-import { createPost } from "@/app/actions/post-actions";
+import { createPost } from "@/app/actions/admin-actions";
 
 export default function NewPostPage() {
   const router = useRouter();

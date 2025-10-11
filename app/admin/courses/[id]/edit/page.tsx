@@ -20,7 +20,7 @@ import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
 import Link from "next/link";
-import { getAdminCourse, updateCourse } from "@/app/actions/course-actions";
+import { getAdminCourse, updateCourse } from "@/app/actions/admin-actions";
 
 export default function EditCoursePage() {
   const params = useParams();

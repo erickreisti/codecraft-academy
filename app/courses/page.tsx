@@ -10,7 +10,7 @@ import { Header } from "@/components/layout/header";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import Link from "next/link";
 import { CourseImage } from "@/components/ui/course-image";
-import { getPublishedCourses } from "@/app/actions/course-actions";
+import { getPublishedCourses } from "@/app/actions/admin-actions";
 
 export default async function CoursesPage() {
   const result = await getPublishedCourses();
