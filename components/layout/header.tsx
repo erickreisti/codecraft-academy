@@ -1,4 +1,4 @@
-// components/layout/header.tsx - VERSÃO SEM ÍCONES NOS LINKS
+// components/layout/header.tsx - DESIGN MELHORADO
 
 "use client";
 
@@ -19,6 +19,8 @@ import {
   Monitor,
   Menu,
   Sparkles,
+  X,
+  ChevronDown,
 } from "lucide-react";
 
 interface UserProfile {
@@ -59,7 +61,12 @@ function ThemeToggleWithDropdown() {
 
   if (!mounted) {
     return (
-      <Button variant="outline" size="icon" disabled className="h-9 w-9">
+      <Button
+        variant="outline"
+        size="icon"
+        disabled
+        className="h-9 w-9 btn-secondary"
+      >
         <Sun className="h-4 w-4" />
       </Button>
     );
@@ -70,7 +77,7 @@ function ThemeToggleWithDropdown() {
       <Button
         variant="outline"
         size="icon"
-        className="h-9 w-9 relative transition-all duration-300 hover:scale-110 hover:shadow-md"
+        className="h-9 w-9 relative btn-secondary hover-lift"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Selecionar tema"
       >
@@ -85,42 +92,113 @@ function ThemeToggleWithDropdown() {
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="absolute right-0 top-12 z-50 w-40 rounded-xl border bg-background/95 backdrop-blur p-2 shadow-xl animate-in fade-in-0 zoom-in-95">
+          <div className="absolute right-0 top-12 z-50 w-48 rounded-lg border bg-background/95 backdrop-blur p-2 shadow-xl animate-in fade-in-0 zoom-in-95">
             <div className="space-y-1">
               <button
                 onClick={() => handleThemeChange("light")}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:text-accent-foreground hover:scale-105 ${
+                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:scale-105 group ${
                   theme === "light"
                     ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
-                    : ""
+                    : "text-foreground"
                 }`}
               >
                 <Sun className="h-4 w-4" />
                 <span>Claro</span>
+                {theme === "light" && (
+                  <div className="ml-auto w-2 h-2 rounded-full bg-blue-500" />
+                )}
               </button>
 
               <button
                 onClick={() => handleThemeChange("dark")}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:text-accent-foreground hover:scale-105 ${
+                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:scale-105 group ${
                   theme === "dark"
                     ? "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
-                    : ""
+                    : "text-foreground"
                 }`}
               >
                 <Moon className="h-4 w-4" />
                 <span>Escuro</span>
+                {theme === "dark" && (
+                  <div className="ml-auto w-2 h-2 rounded-full bg-purple-500" />
+                )}
               </button>
 
               <button
                 onClick={() => handleThemeChange("system")}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:text-accent-foreground hover:scale-105 ${
+                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:scale-105 group ${
                   theme === "system"
                     ? "bg-gray-50 text-gray-700 dark:bg-gray-900/20 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
-                    : ""
+                    : "text-foreground"
                 }`}
               >
                 <Monitor className="h-4 w-4" />
                 <span>Sistema</span>
+                {theme === "system" && (
+                  <div className="ml-auto w-2 h-2 rounded-full bg-gray-500" />
+                )}
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// User Dropdown Component
+function UserDropdown({
+  user,
+  onLogout,
+}: {
+  user: User;
+  onLogout: () => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="relative">
+      <Button
+        variant="ghost"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg btn-ghost hover-lift"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="user-avatar">
+          <UserAvatar size="md" showName={false} />
+        </div>
+        <ChevronDown
+          className={`h-4 w-4 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </Button>
+
+      {isOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute right-0 top-12 z-50 w-48 rounded-lg border bg-background/95 backdrop-blur p-2 shadow-xl animate-in fade-in-0 zoom-in-95">
+            <div className="space-y-1">
+              <Link href="/dashboard">
+                <button
+                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:scale-105 group text-foreground"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <UserIcon className="h-4 w-4" />
+                  <span>Dashboard</span>
+                </button>
+              </Link>
+              <button
+                onClick={() => {
+                  onLogout();
+                  setIsOpen(false);
+                }}
+                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-destructive transition-all duration-200 hover:bg-destructive/10 hover:scale-105 group"
+              >
+                <X className="h-4 w-4" />
+                <span>Sair</span>
               </button>
             </div>
           </div>
@@ -137,6 +215,7 @@ export function Header() {
   const { getItemCount, setIsOpen, _hasHydrated } = useCartStore();
   const [isReady, setIsReady] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   // Links de navegação SEM ÍCONES
   const navigationItems = [
@@ -149,6 +228,15 @@ export function Header() {
   useEffect(() => {
     setIsReady(_hasHydrated);
   }, [_hasHydrated]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     let isSubscribed = true;
@@ -223,42 +311,46 @@ export function Header() {
   };
 
   return (
-    <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 shadow-sm">
+    <header
+      className={`sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
+        scrolled ? "shadow-lg shadow-black/5" : "shadow-sm"
+      }`}
+    >
       <div className="container-custom flex h-16 items-center justify-between">
         {/* LOGO */}
         <Link
           href="/"
-          className="flex items-center space-x-3 group flex-shrink-0"
+          className="flex items-center space-x-3 group flex-shrink-0 hover-lift"
         >
-          <div className="h-10 w-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-300">
+          <div className="h-10 w-10 gradient-bg rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
             <Sparkles className="h-5 w-5 text-white" />
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-5">
+            <span className="font-bold text-xl gradient-text leading-5">
               CodeCraft
             </span>
-            <span className="text-xs text-muted-foreground leading-3 dark:text-gray-400">
+            <span className="text-xs text-muted-foreground leading-3">
               Academy
             </span>
           </div>
         </Link>
 
         {/* NAVEGAÇÃO PRINCIPAL - SEM ÍCONES */}
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden md:flex items-center space-x-1 bg-background/50 rounded-2xl p-1 border border-border/50">
           {navigationItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-foreground hover:text-primary transition-all duration-200 relative py-2 group"
+              className="text-sm font-medium text-foreground hover:text-primary transition-all duration-200 relative px-4 py-2 rounded-lg group hover:bg-accent/50"
             >
               {item.label}
-              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-primary transition-all duration-200 group-hover:w-full"></span>
+              <span className="absolute bottom-1 left-4 right-4 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200 group-hover:scale-x-100"></span>
             </Link>
           ))}
         </nav>
 
         {/* ÁREA DE AÇÕES DO USUÁRIO */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           {/* Toggle de tema */}
           <ThemeToggleWithDropdown />
 
@@ -267,21 +359,23 @@ export function Header() {
             <Button
               variant="outline"
               size="icon"
-              className="relative h-9 w-9 transition-all duration-300 hover:scale-110 hover:shadow-md"
+              className="relative h-9 w-9 btn-secondary hover-lift"
               onClick={() => setIsOpen(true)}
             >
               <ShoppingCart className="h-4 w-4" />
               {getItemCount() > 0 && (
-                <Badge
-                  variant="secondary"
-                  className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs animate-bounce"
-                >
+                <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 border-2 border-background animate-pulse">
                   {getItemCount()}
                 </Badge>
               )}
             </Button>
           ) : (
-            <Button variant="outline" size="icon" className="h-9 w-9" disabled>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 btn-secondary"
+              disabled
+            >
               <ShoppingCart className="h-4 w-4 opacity-50" />
             </Button>
           )}
@@ -289,40 +383,30 @@ export function Header() {
           {/* Estados de autenticação */}
           {isLoading ? (
             // Loading state
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
               <div className="hidden sm:flex space-x-2">
-                <div className="w-20 h-9 rounded-md bg-muted animate-pulse"></div>
-                <div className="w-16 h-9 rounded-md bg-muted animate-pulse"></div>
+                <div className="w-20 h-9 rounded-lg bg-muted animate-pulse"></div>
+                <div className="w-16 h-9 rounded-lg bg-muted animate-pulse"></div>
               </div>
             </div>
           ) : user ? (
             // Usuário logado
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
               {/* Dashboard button - apenas desktop */}
               <Link href="/dashboard" className="hidden sm:inline">
                 <Button
-                  variant="secondary"
+                  variant="outline"
                   size="sm"
-                  className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 transition-all duration-300 hover:scale-105"
+                  className="btn-secondary hover-lift flex items-center gap-2"
                 >
                   <UserIcon className="h-4 w-4" />
                   <span className="hidden lg:inline">Dashboard</span>
                 </Button>
               </Link>
 
-              {/* Avatar do usuário */}
-              <UserAvatar size="md" showName={true} />
-
-              {/* Botão Sair */}
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden sm:flex btn btn-secondary hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-colors"
-                onClick={handleLogout}
-              >
-                Sair
-              </Button>
+              {/* Avatar do usuário com dropdown */}
+              <UserDropdown user={user} onLogout={handleLogout} />
             </div>
           ) : (
             // Usuário não logado
@@ -331,16 +415,13 @@ export function Header() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="btn btn-secondary transition-all duration-300 hover:scale-105"
+                  className="btn-secondary hover-lift"
                 >
                   Entrar
                 </Button>
               </Link>
               <Link href="/register">
-                <Button
-                  size="sm"
-                  className="btn btn-primary bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl"
-                >
+                <Button size="sm" className="btn-primary hover-lift">
                   Cadastrar
                 </Button>
               </Link>
@@ -351,10 +432,14 @@ export function Header() {
           <Button
             variant="outline"
             size="icon"
-            className="md:hidden h-9 w-9 transition-all duration-300 hover:scale-110"
+            className="md:hidden h-9 w-9 btn-secondary hover-lift"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            <Menu className="h-4 w-4" />
+            {mobileMenuOpen ? (
+              <X className="h-4 w-4" />
+            ) : (
+              <Menu className="h-4 w-4" />
+            )}
           </Button>
         </div>
       </div>
@@ -362,12 +447,12 @@ export function Header() {
       {/* MENU MOBILE EXPANDIDO - SEM ÍCONES */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t bg-background/95 backdrop-blur animate-in slide-in-from-top duration-300">
-          <div className="container-custom py-4 space-y-2">
+          <div className="container-custom py-6 space-y-3">
             {navigationItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary transition-all duration-200 rounded-lg hover:bg-accent/50 border border-transparent hover:border-accent"
+                className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary transition-all duration-200 rounded-lg hover:bg-accent/50 text-center hover-lift"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.label}
@@ -376,11 +461,11 @@ export function Header() {
 
             {/* Ações mobile para usuário não logado */}
             {!user && !isLoading && (
-              <div className="pt-2 border-t space-y-2">
+              <div className="pt-4 border-t space-y-3">
                 <Link href="/login" className="block w-full">
                   <Button
                     variant="outline"
-                    className="w-full justify-center"
+                    className="w-full justify-center btn-secondary"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Entrar
@@ -388,7 +473,7 @@ export function Header() {
                 </Link>
                 <Link href="/register" className="block w-full">
                   <Button
-                    className="w-full justify-center bg-gradient-to-r from-blue-600 to-purple-600"
+                    className="w-full justify-center btn-primary"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Cadastrar
@@ -399,11 +484,23 @@ export function Header() {
 
             {/* Ações mobile para usuário logado */}
             {user && !isLoading && (
-              <div className="pt-2 border-t space-y-2">
+              <div className="pt-4 border-t space-y-3">
+                <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-accent/30">
+                  <div className="user-avatar">
+                    <UserAvatar size="md" showName={false} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Minha Conta</span>
+                    <span className="text-xs text-muted-foreground">
+                      Ver perfil
+                    </span>
+                  </div>
+                </div>
+
                 <Link href="/dashboard" className="block w-full">
                   <Button
                     variant="outline"
-                    className="w-full justify-center"
+                    className="w-full justify-center btn-secondary"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Dashboard
@@ -426,7 +523,7 @@ export function Header() {
       )}
 
       {/* BORDER GRADIENT DECORATIVA */}
-      <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-purple-500/40"></div>
+      <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-purple-500/20"></div>
 
       {/* Sidebar do Carrinho */}
       <CartSidebar />
