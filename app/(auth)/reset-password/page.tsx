@@ -1,4 +1,4 @@
-// app/reset-password/page.tsx - DESIGN PREMIUM CORRIGIDO
+// app/reset-password/page.tsx - CORREÇÃO DO LOADING
 "use client";
 
 import { useState, useEffect } from "react";
@@ -29,11 +29,13 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [tokenValid, setTokenValid] = useState(true);
+  const [checkingAuth, setCheckingAuth] = useState(true); // Novo estado para loading inicial
   const router = useRouter();
 
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
+        setCheckingAuth(true);
         const {
           data: { session },
         } = await supabase.auth.getSession();
@@ -47,6 +49,8 @@ export default function ResetPasswordPage() {
       } catch (error) {
         setTokenValid(false);
         setError("Erro ao verificar autenticação");
+      } finally {
+        setCheckingAuth(false);
       }
     };
 
@@ -73,6 +77,7 @@ export default function ResetPasswordPage() {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
     if (!passwordRegex.test(password)) {
       setError("A senha deve conter letras maiúsculas, minúsculas e números");
+      setLoading(false);
       return;
     }
 
@@ -103,6 +108,32 @@ export default function ResetPasswordPage() {
       setLoading(false);
     }
   };
+
+  // Loading durante verificação de autenticação
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 p-8 text-center">
+          <div className="flex flex-col items-center justify-center space-y-6">
+            {/* Spinner azul centralizado */}
+            <Spinner
+              size="lg"
+              className="border-blue-600 border-t-transparent"
+            />
+
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold text-foreground">
+                Verificando acesso
+              </h2>
+              <p className="text-muted-foreground text-sm">
+                Validando seu link de redefinição...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!tokenValid && !success) {
     return (
@@ -161,7 +192,11 @@ export default function ResetPasswordPage() {
             Redirecionando para o login...
           </p>
 
-          <div className="w-12 h-12 mx-auto border-4 border-green-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+          {/* Spinner azul no sucesso também */}
+          <Spinner
+            size="lg"
+            className="border-blue-600 border-t-transparent mx-auto"
+          />
         </div>
       </div>
     );

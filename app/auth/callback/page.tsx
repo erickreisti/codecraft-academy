@@ -1,10 +1,11 @@
-// app/auth/callback/page.tsx - VERIFICAR SE ESTÁ ASSIM
+// app/auth/callback/page.tsx - ATUALIZADO COM SPINNER
 "use client";
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -13,8 +14,6 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const processCallback = async () => {
       try {
-        console.log("🔄 Processando callback...");
-
         // O token já foi processado automaticamente pelo Supabase do hash
         const {
           data: { session },
@@ -22,16 +21,13 @@ export default function AuthCallbackPage() {
         const next = searchParams.get("next") || "/dashboard";
 
         if (session) {
-          console.log("✅ Autenticado! Redirecionando para:", next);
           toast.success("Autenticado com sucesso!");
           router.push(next);
         } else {
-          console.log("❌ Falha na autenticação");
           toast.error("Falha na autenticação");
           router.push("/login");
         }
       } catch (error) {
-        console.error("💥 Erro no callback:", error);
         toast.error("Erro inesperado");
         router.push("/login");
       }
@@ -41,11 +37,26 @@ export default function AuthCallbackPage() {
   }, [router, searchParams]);
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center space-y-4">
-        <div className="text-6xl animate-spin">🔄</div>
-        <h2 className="text-xl font-bold">Processando...</h2>
-        <p className="text-muted-foreground">Aguarde um momento</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 p-8 text-center">
+        <div className="flex flex-col items-center justify-center space-y-6">
+          {/* Spinner azul centralizado */}
+          <Spinner size="lg" className="border-blue-600 border-t-transparent" />
+
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold text-foreground">
+              Processando autenticação
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              Aguarde enquanto validamos suas credenciais...
+            </p>
+          </div>
+
+          {/* Indicador de progresso adicional */}
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full animate-pulse"></div>
+          </div>
+        </div>
       </div>
     </div>
   );
