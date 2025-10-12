@@ -1,3 +1,4 @@
+// app/courses/page.tsx - COM IMAGEM IGUAL AO BLOG
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -124,87 +125,74 @@ export default async function CoursesPage() {
         <div className="container-custom">
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {courses?.map((course) => (
-              <Card
+              <article
                 key={course.id}
-                className="group hover-lift border-0 shadow-lg bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm transition-all duration-300 hover:shadow-xl overflow-hidden"
+                className="group bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover-lift border overflow-hidden"
               >
-                <CardHeader className="pb-4 p-0">
-                  {/* IMAGEM DO CURSO */}
-                  <div className="h-48 rounded-t-xl relative overflow-hidden">
-                    <CourseImage
-                      src={course.image_url}
-                      alt={course.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
+                {/* IMAGEM DO CURSO - IGUAL AO BLOG */}
+                <div className="h-48 relative overflow-hidden">
+                  <CourseImage
+                    src={course.image_url}
+                    alt={course.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-                    {/* Overlay escuro para melhor contraste */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                    {/* Badge de nível */}
-                    <div className="absolute top-3 left-3 z-10">
-                      <div
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium border backdrop-blur-sm ${
-                          course.level === "iniciante"
-                            ? "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/80 dark:text-green-200 dark:border-green-700"
-                            : course.level === "intermediario"
-                            ? "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/80 dark:text-blue-200 dark:border-blue-700"
-                            : "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/80 dark:text-purple-200 dark:border-purple-700"
-                        }`}
-                      >
-                        {course.level}
-                      </div>
+                  {/* Badge de nível - estilo blog */}
+                  <div className="absolute top-4 left-4">
+                    <div
+                      className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
+                        course.level === "iniciante"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/90 dark:text-green-200"
+                          : course.level === "intermediario"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/90 dark:text-blue-200"
+                          : "bg-purple-100 text-purple-800 dark:bg-purple-900/90 dark:text-purple-200"
+                      }`}
+                    >
+                      {course.level}
                     </div>
-
-                    {/* Overlay de ação MELHORADO */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 scale-95 group-hover:scale-100 p-4">
-                      <div className="text-center space-y-4 w-full">
-                        {/* Ícone principal */}
-                        <div className="w-14 h-14 mx-auto bg-white/95 dark:bg-gray-900/95 rounded-xl flex items-center justify-center shadow-2xl backdrop-blur-sm border border-white/20 mb-2">
-                          <PlayCircle className="h-7 w-7 text-blue-600 dark:text-blue-400" />
-                        </div>
-
-                        {/* Texto informativo */}
-                        <div className="space-y-2">
-                          <h3 className="text-white font-semibold text-base drop-shadow-lg">
-                            Ver Curso
-                          </h3>
-                          <p className="text-white/90 text-xs drop-shadow-lg leading-relaxed px-2">
-                            Clique para ver detalhes completos e conteúdo
-                            programático
-                          </p>
-                        </div>
-
-                        {/* Badge de destaque */}
-                        <div className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-lg mt-1">
-                          <BookOpen className="h-3 w-3" />
-                          <span>Conteúdo Exclusivo</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Efeito de brilho no hover */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-t-xl" />
                   </div>
 
-                  <div className="p-5 pb-0">
-                    {/* TÍTULO E DESCRIÇÃO */}
-                    <CardTitle className="text-lg leading-tight line-clamp-2 mb-2 group-hover:text-primary transition-colors">
-                      {course.title}
-                    </CardTitle>
+                  {/* Overlay de ação - estilo blog */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <div className="text-center space-y-4 p-4">
+                      <div className="w-14 h-14 mx-auto bg-white/95 dark:bg-gray-900/95 rounded-xl flex items-center justify-center shadow-2xl backdrop-blur-sm border border-white/20">
+                        <PlayCircle className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+                      </div>
 
-                    <CardDescription className="line-clamp-2 text-sm text-muted-foreground leading-relaxed">
-                      {course.short_description ||
-                        "Domine as tecnologias mais demandadas do mercado com projetos práticos."}
-                    </CardDescription>
+                      <div className="space-y-2">
+                        <h3 className="text-white font-semibold text-base drop-shadow-lg">
+                          Ver Curso
+                        </h3>
+                        <p className="text-white/90 text-xs drop-shadow-lg leading-relaxed">
+                          Clique para ver detalhes completos
+                        </p>
+                      </div>
+
+                      <div className="inline-flex items-center gap-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1.5 rounded-full text-xs font-medium shadow-lg">
+                        <BookOpen className="h-3 w-3" />
+                        <span>Conteúdo Exclusivo</span>
+                      </div>
+                    </div>
                   </div>
-                </CardHeader>
+                </div>
 
-                <CardContent className="space-y-5 p-5 pt-0">
+                {/* CONTEÚDO DO CURSO */}
+                <div className="p-6 space-y-4">
+                  <h3 className="font-bold text-xl leading-tight line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">
+                    {course.title}
+                  </h3>
+
+                  <p className="text-muted-foreground leading-relaxed line-clamp-3 min-h-[4.5rem]">
+                    {course.short_description ||
+                      "Domine as tecnologias mais demandadas do mercado com projetos práticos."}
+                  </p>
+
                   {/* METADADOS DO CURSO */}
-                  <div className="grid grid-cols-3 gap-3 py-3 border-y">
+                  <div className="grid grid-cols-3 gap-4 py-4 border-y">
                     <div className="text-center">
-                      <div className="w-9 h-9 mx-auto bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-1.5">
-                        <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                      <div className="w-10 h-10 mx-auto bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-2">
+                        <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div className="text-sm font-medium text-foreground">
                         {course.duration_hours}h
@@ -215,8 +203,8 @@ export default async function CoursesPage() {
                     </div>
 
                     <div className="text-center">
-                      <div className="w-9 h-9 mx-auto bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-1.5">
-                        <Target className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <div className="w-10 h-10 mx-auto bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center mb-2">
+                        <Target className="h-5 w-5 text-green-600 dark:text-green-400" />
                       </div>
                       <div className="text-sm font-medium text-foreground capitalize">
                         {course.level}
@@ -225,8 +213,8 @@ export default async function CoursesPage() {
                     </div>
 
                     <div className="text-center">
-                      <div className="w-9 h-9 mx-auto bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-1.5">
-                        <FolderOpen className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                      <div className="w-10 h-10 mx-auto bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center mb-2">
+                        <FolderOpen className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                       </div>
                       <div className="text-sm font-medium text-foreground">
                         {course.category}
@@ -240,50 +228,44 @@ export default async function CoursesPage() {
                   {/* PREÇO E AVALIAÇÃO */}
                   <div className="flex justify-between items-center">
                     <div className="space-y-1">
-                      <div className="text-xl font-bold text-primary">
+                      <div className="text-2xl font-bold text-primary">
                         {course.price === 0
                           ? "Gratuito"
                           : `R$ ${course.price?.toFixed(2)}`}
                       </div>
                       {course.price !== 0 && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                           <span>4.9 (250)</span>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3" />
+                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                      <Users className="h-4 w-4" />
                       <span>1.2k</span>
                     </div>
                   </div>
 
                   {/* BOTÕES DE AÇÃO */}
-                  <div className="space-y-2">
-                    <Button
-                      asChild
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-2.5 text-sm transition-all duration-300 hover:scale-105"
+                  <div className="space-y-3">
+                    <Link
+                      href={`/courses/${course.slug}`}
+                      className="w-full inline-flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-300 hover:scale-105"
                     >
-                      <Link
-                        href={`/courses/${course.slug}`}
-                        className="flex items-center justify-center gap-2"
-                      >
-                        <BookOpen className="h-4 w-4" />
-                        Ver Detalhes
-                        <ArrowRight className="h-3 w-3" />
-                      </Link>
-                    </Button>
+                      <BookOpen className="h-5 w-5" />
+                      Ver Detalhes
+                      <ArrowRight className="h-4 w-4" />
+                    </Link>
 
                     <AddToCartButton
                       course={course}
                       variant="outline"
-                      size="sm"
-                      className="w-full py-2.5 text-sm border-2 hover:border-primary hover:bg-primary/5 transition-all duration-300 hover:scale-105"
+                      className="w-full py-3 border-2 hover:border-primary hover:bg-primary/5 transition-all duration-300 hover:scale-105 rounded-lg"
                     />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </article>
             ))}
           </div>
 
@@ -317,16 +299,16 @@ export default async function CoursesPage() {
 
           {/* CALL TO ACTION */}
           {courses && courses.length > 0 && (
-            <div className="text-center mt-16 pt-12 border-t">
+            <div className="text-center mt-20 pt-16 border-t">
               <div className="max-w-2xl mx-auto">
                 <h3 className="text-2xl lg:text-3xl font-bold mb-4 text-foreground">
                   Não encontrou o que procurava?
                 </h3>
-                <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+                <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
                   Temos novos cursos sendo lançados constantemente. Entre em
                   contato e nos diga qual tecnologia você gostaria de aprender!
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button asChild className="btn btn-primary">
                     <Link href="/contact" className="flex items-center gap-2">
                       Falar com Consultor
@@ -344,6 +326,8 @@ export default async function CoursesPage() {
           )}
         </div>
       </section>
+
+      <Footer />
     </div>
   );
 }
