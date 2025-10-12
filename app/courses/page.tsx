@@ -344,8 +344,6 @@ export default async function CoursesPage() {
           )}
         </div>
       </section>
-
-      <Footer />
     </div>
   );
 }
