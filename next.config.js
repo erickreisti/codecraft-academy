@@ -1,38 +1,33 @@
-// next.config.js - CONFIGURAÇÃO OTIMIZADA PARA SUPABASE
+// next.config.js
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: {
-      allowedOrigins: ["localhost:3000", "your-production-domain.com"],
-    },
-  },
   images: {
     remotePatterns: [
-      // ✅ Configuração específica para Supabase Storage
       {
         protocol: "https",
         hostname: "gyarobrsaodtkhilrtru.supabase.co",
-        pathname: "/storage/v1/object/public/course-images/**",
+        pathname: "/storage/v1/object/public/**",
       },
       {
         protocol: "https",
-        hostname: "gyarobrsaodtkhilrtru.supabase.co",
-        pathname: "/storage/v1/object/public/post-images/**",
+        hostname: "lh3.googleusercontent.com",
+        pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "gyarobrsaodtkhilrtru.supabase.co",
-        pathname: "/storage/v1/object/public/avatars/**",
+        hostname: "avatars.githubusercontent.com",
+        pathname: "/**",
       },
     ],
+    formats: ["image/webp", "image/avif"],
+    minimumCacheTTL: 60,
   },
-  // Para desenvolvimento, você pode desativar a verificação de imagem
-  // (apenas em desenvolvimento, não em produção)
-  ...(process.env.NODE_ENV === "development" && {
-    images: {
-      unoptimized: true,
-    },
-  }),
+  experimental: {
+    optimizeCss: true,
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production",
+  },
 };
 
 module.exports = nextConfig;
