@@ -1,4 +1,4 @@
-// components/layout/header.tsx - DESIGN PREMIUM CORRIGIDO
+// components/layout/header.tsx - APENAS EFEITO NEON NO HOVER
 
 "use client";
 
@@ -21,6 +21,7 @@ import {
   Sparkles,
   X,
   ChevronDown,
+  Settings,
 } from "lucide-react";
 
 interface UserProfile {
@@ -68,17 +69,17 @@ function ThemeToggleWithDropdown() {
   return (
     <div className="relative">
       <button
-        className="group relative w-9 h-9 rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 flex items-center justify-center"
+        className="group relative w-9 h-9 rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Selecionar tema"
       >
         <div className="relative w-5 h-5">
-          <Sun className="w-4 h-4 text-amber-500 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 absolute inset-0 m-auto" />
-          <Moon className="w-4 h-4 text-blue-400 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 absolute inset-0 m-auto" />
+          <Sun className="w-4 h-4 text-amber-500 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 absolute inset-0 m-auto group-hover:text-amber-300 group-hover:drop-shadow-[0_0_12px_rgba(251,191,36,0.9)] group-hover:scale-110" />
+          <Moon className="w-4 h-4 text-blue-400 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 absolute inset-0 m-auto group-hover:text-blue-200 group-hover:drop-shadow-[0_0_12px_rgba(96,165,250,0.9)] group-hover:scale-110" />
         </div>
 
-        {/* Efeito de brilho */}
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+        {/* Apenas o efeito de glow externo neon - removido o risco branco */}
+        <div className="absolute -inset-1 rounded-xl bg-amber-400/40 dark:bg-blue-400/40 opacity-0 group-hover:opacity-100 blur-lg transition-all duration-300" />
       </button>
 
       {isOpen && (
@@ -209,6 +210,7 @@ function UserDropdown({
                 </p>
               </div>
 
+              {/* Dashboard e Profile juntos */}
               <Link href="/dashboard">
                 <button
                   className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-gray-700 dark:text-gray-300 transition-all duration-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:scale-105 group"
@@ -220,6 +222,20 @@ function UserDropdown({
                   <span className="font-medium">Dashboard</span>
                 </button>
               </Link>
+
+              <Link href="/dashboard/profile">
+                <button
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-gray-700 dark:text-gray-300 transition-all duration-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:scale-105 group"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                    <Settings className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <span className="font-medium">Perfil</span>
+                </button>
+              </Link>
+
+              <div className="border-t my-1" />
 
               <button
                 onClick={() => {
@@ -529,6 +545,14 @@ export function Header() {
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Dashboard
+                  </button>
+                </Link>
+                <Link href="/dashboard/profile" className="block w-full">
+                  <button
+                    className="w-full px-6 py-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium text-base transition-all duration-300 hover:scale-105 hover:shadow-md"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Perfil
                   </button>
                 </Link>
                 <button
