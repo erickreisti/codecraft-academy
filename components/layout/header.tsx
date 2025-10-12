@@ -1,4 +1,4 @@
-// components/layout/header.tsx - DESIGN MELHORADO
+// components/layout/header.tsx - DESIGN PREMIUM CORRIGIDO
 
 "use client";
 
@@ -61,29 +61,25 @@ function ThemeToggleWithDropdown() {
 
   if (!mounted) {
     return (
-      <Button
-        variant="outline"
-        size="icon"
-        disabled
-        className="h-9 w-9 btn-secondary"
-      >
-        <Sun className="h-4 w-4" />
-      </Button>
+      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 animate-pulse"></div>
     );
   }
 
   return (
     <div className="relative">
-      <Button
-        variant="outline"
-        size="icon"
-        className="h-9 w-9 relative btn-secondary hover-lift"
+      <button
+        className="group relative w-9 h-9 rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105 flex items-center justify-center"
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Selecionar tema"
       >
-        <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      </Button>
+        <div className="relative w-5 h-5">
+          <Sun className="w-4 h-4 text-amber-500 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 absolute inset-0 m-auto" />
+          <Moon className="w-4 h-4 text-blue-400 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 absolute inset-0 m-auto" />
+        </div>
+
+        {/* Efeito de brilho */}
+        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      </button>
 
       {isOpen && (
         <>
@@ -92,48 +88,72 @@ function ThemeToggleWithDropdown() {
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="absolute right-0 top-12 z-50 w-48 rounded-lg border bg-background/95 backdrop-blur p-2 shadow-xl animate-in fade-in-0 zoom-in-95">
-            <div className="space-y-1">
+          <div className="absolute right-0 top-12 z-50 w-48 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-3 shadow-2xl animate-in fade-in-0 zoom-in-95">
+            <div className="space-y-2">
               <button
                 onClick={() => handleThemeChange("light")}
-                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:scale-105 group ${
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all duration-300 group ${
                   theme === "light"
-                    ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
-                    : "text-foreground"
+                    ? "bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 dark:from-amber-900/20 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105"
                 }`}
               >
-                <Sun className="h-4 w-4" />
-                <span>Claro</span>
+                <div
+                  className={`p-2 rounded-lg ${
+                    theme === "light"
+                      ? "bg-amber-100 dark:bg-amber-900/30"
+                      : "bg-gray-100 dark:bg-gray-800"
+                  }`}
+                >
+                  <Sun className="h-4 w-4" />
+                </div>
+                <span className="font-medium">Claro</span>
                 {theme === "light" && (
-                  <div className="ml-auto w-2 h-2 rounded-full bg-blue-500" />
+                  <div className="ml-auto w-2 h-2 rounded-full bg-amber-500" />
                 )}
               </button>
 
               <button
                 onClick={() => handleThemeChange("dark")}
-                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:scale-105 group ${
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all duration-300 group ${
                   theme === "dark"
-                    ? "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
-                    : "text-foreground"
+                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 dark:from-blue-900/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105"
                 }`}
               >
-                <Moon className="h-4 w-4" />
-                <span>Escuro</span>
+                <div
+                  className={`p-2 rounded-lg ${
+                    theme === "dark"
+                      ? "bg-blue-100 dark:bg-blue-900/30"
+                      : "bg-gray-100 dark:bg-gray-800"
+                  }`}
+                >
+                  <Moon className="h-4 w-4" />
+                </div>
+                <span className="font-medium">Escuro</span>
                 {theme === "dark" && (
-                  <div className="ml-auto w-2 h-2 rounded-full bg-purple-500" />
+                  <div className="ml-auto w-2 h-2 rounded-full bg-blue-500" />
                 )}
               </button>
 
               <button
                 onClick={() => handleThemeChange("system")}
-                className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:scale-105 group ${
+                className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all duration-300 group ${
                   theme === "system"
-                    ? "bg-gray-50 text-gray-700 dark:bg-gray-900/20 dark:text-gray-300 border border-gray-200 dark:border-gray-800"
-                    : "text-foreground"
+                    ? "bg-gradient-to-r from-gray-50 to-slate-50 text-gray-700 dark:from-gray-800/20 dark:text-gray-300 border border-gray-200 dark:border-gray-700 shadow-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105"
                 }`}
               >
-                <Monitor className="h-4 w-4" />
-                <span>Sistema</span>
+                <div
+                  className={`p-2 rounded-lg ${
+                    theme === "system"
+                      ? "bg-gray-100 dark:bg-gray-800"
+                      : "bg-gray-100 dark:bg-gray-800"
+                  }`}
+                >
+                  <Monitor className="h-4 w-4" />
+                </div>
+                <span className="font-medium">Sistema</span>
                 {theme === "system" && (
                   <div className="ml-auto w-2 h-2 rounded-full bg-gray-500" />
                 )}
@@ -158,20 +178,19 @@ function UserDropdown({
 
   return (
     <div className="relative">
-      <Button
-        variant="ghost"
-        className="flex items-center gap-2 px-3 py-2 rounded-lg btn-ghost hover-lift"
+      <button
+        className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-300 hover:scale-105 group"
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="user-avatar">
           <UserAvatar size="md" showName={false} />
         </div>
         <ChevronDown
-          className={`h-4 w-4 transition-transform duration-200 ${
+          className={`h-4 w-4 text-gray-600 dark:text-gray-400 transition-transform duration-300 ${
             isOpen ? "rotate-180" : ""
           }`}
         />
-      </Button>
+      </button>
 
       {isOpen && (
         <>
@@ -179,26 +198,40 @@ function UserDropdown({
             className="fixed inset-0 z-40"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 top-12 z-50 w-48 rounded-lg border bg-background/95 backdrop-blur p-2 shadow-xl animate-in fade-in-0 zoom-in-95">
-            <div className="space-y-1">
+          <div className="absolute right-0 top-12 z-50 w-56 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-3 shadow-2xl animate-in fade-in-0 zoom-in-95">
+            <div className="space-y-2">
+              <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                  Minha Conta
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Gerencie sua conta
+                </p>
+              </div>
+
               <Link href="/dashboard">
                 <button
-                  className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm transition-all duration-200 hover:bg-accent hover:scale-105 group text-foreground"
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-gray-700 dark:text-gray-300 transition-all duration-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:scale-105 group"
                   onClick={() => setIsOpen(false)}
                 >
-                  <UserIcon className="h-4 w-4" />
-                  <span>Dashboard</span>
+                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                    <UserIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <span className="font-medium">Dashboard</span>
                 </button>
               </Link>
+
               <button
                 onClick={() => {
                   onLogout();
                   setIsOpen(false);
                 }}
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-destructive transition-all duration-200 hover:bg-destructive/10 hover:scale-105 group"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-red-600 dark:text-red-400 transition-all duration-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:scale-105 group"
               >
-                <X className="h-4 w-4" />
-                <span>Sair</span>
+                <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30">
+                  <X className="h-4 w-4" />
+                </div>
+                <span className="font-medium">Sair</span>
               </button>
             </div>
           </div>
@@ -310,41 +343,53 @@ export function Header() {
     await supabase.auth.signOut();
   };
 
+  const cartItemCount = isReady ? getItemCount() : 0;
+
   return (
     <header
-      className={`sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 transition-all duration-300 ${
-        scrolled ? "shadow-lg shadow-black/5" : "shadow-sm"
+      className={`sticky top-0 z-50 transition-all duration-500 ${
+        scrolled
+          ? "bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl shadow-2xl shadow-black/5 border-b border-gray-200 dark:border-gray-800"
+          : "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-100 dark:border-gray-800"
       }`}
     >
-      <div className="container-custom flex h-16 items-center justify-between">
+      <div className="container-custom flex h-20 items-center justify-between">
         {/* LOGO */}
         <Link
           href="/"
-          className="flex items-center space-x-3 group flex-shrink-0 hover-lift"
+          className="flex items-center space-x-4 group flex-shrink-0"
         >
-          <div className="h-10 w-10 gradient-bg rounded-lg flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300">
-            <Sparkles className="h-5 w-5 text-white" />
+          <div className="relative">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-2xl group-hover:shadow-3xl transition-all duration-500 group-hover:scale-105 rotate-0 group-hover:rotate-3">
+              <Sparkles className="h-6 w-6 text-white" />
+            </div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl opacity-0 group-hover:opacity-20 blur transition-opacity duration-500"></div>
           </div>
           <div className="flex flex-col">
-            <span className="font-bold text-xl gradient-text leading-5">
+            <span className="font-bold text-2xl bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent leading-7">
               CodeCraft
             </span>
-            <span className="text-xs text-muted-foreground leading-3">
-              Academy
+            <span className="text-xs text-gray-500 dark:text-gray-400 leading-3 tracking-wider font-medium">
+              ACADEMY
             </span>
           </div>
         </Link>
 
         {/* NAVEGAÇÃO PRINCIPAL - SEM ÍCONES */}
-        <nav className="hidden md:flex items-center space-x-1 bg-background/50 rounded-2xl p-1 border border-border/50">
-          {navigationItems.map((item) => (
+        <nav className="hidden md:flex items-center space-x-1 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-2xl p-2 border border-gray-200 dark:border-gray-700 shadow-sm">
+          {navigationItems.map((item, index) => (
             <Link
               key={item.href}
               href={item.href}
-              className="text-sm font-medium text-foreground hover:text-primary transition-all duration-200 relative px-4 py-2 rounded-lg group hover:bg-accent/50"
+              className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all duration-300 relative rounded-xl group hover:bg-white dark:hover:bg-gray-800 hover:shadow-md"
             >
-              {item.label}
-              <span className="absolute bottom-1 left-4 right-4 h-0.5 bg-primary transform scale-x-0 transition-transform duration-200 group-hover:scale-x-100"></span>
+              <span className="relative z-10">{item.label}</span>
+
+              {/* Efeito de fundo hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-purple-500/0 rounded-xl transition-all duration-300 group-hover:from-blue-500/5 group-hover:to-purple-500/5"></div>
+
+              {/* Indicador ativo */}
+              <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </Link>
           ))}
         </nav>
@@ -355,39 +400,29 @@ export function Header() {
           <ThemeToggleWithDropdown />
 
           {/* Botão do Carrinho */}
-          {isReady ? (
-            <Button
-              variant="outline"
-              size="icon"
-              className="relative h-9 w-9 btn-secondary hover-lift"
-              onClick={() => setIsOpen(true)}
-            >
-              <ShoppingCart className="h-4 w-4" />
-              {getItemCount() > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center text-xs bg-red-500 border-2 border-background animate-pulse">
-                  {getItemCount()}
-                </Badge>
-              )}
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="icon"
-              className="h-9 w-9 btn-secondary"
-              disabled
-            >
-              <ShoppingCart className="h-4 w-4 opacity-50" />
-            </Button>
-          )}
+          <button
+            className="relative w-10 h-10 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-300 hover:scale-105 flex items-center justify-center group"
+            onClick={() => setIsOpen(true)}
+            disabled={!isReady}
+            aria-label={`Carrinho de compras, ${cartItemCount} itens`}
+          >
+            <ShoppingCart className="h-4 w-4 text-gray-700 dark:text-gray-300 group-hover:scale-110 transition-transform duration-200" />
+
+            {cartItemCount > 0 && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-red-500 to-pink-500 rounded-full flex items-center justify-center text-xs text-white font-bold border-2 border-white dark:border-gray-900 shadow-lg animate-pulse">
+                {cartItemCount}
+              </div>
+            )}
+          </button>
 
           {/* Estados de autenticação */}
           {isLoading ? (
             // Loading state
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-muted animate-pulse"></div>
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 animate-pulse"></div>
               <div className="hidden sm:flex space-x-2">
-                <div className="w-20 h-9 rounded-lg bg-muted animate-pulse"></div>
-                <div className="w-16 h-9 rounded-lg bg-muted animate-pulse"></div>
+                <div className="w-20 h-9 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 animate-pulse"></div>
+                <div className="w-16 h-9 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 animate-pulse"></div>
               </div>
             </div>
           ) : user ? (
@@ -395,14 +430,10 @@ export function Header() {
             <div className="flex items-center space-x-3">
               {/* Dashboard button - apenas desktop */}
               <Link href="/dashboard" className="hidden sm:inline">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="btn-secondary hover-lift flex items-center gap-2"
-                >
+                <button className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/20 hover:to-purple-500/20 border border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 font-medium text-sm transition-all duration-300 hover:scale-105 hover:shadow-md flex items-center gap-2">
                   <UserIcon className="h-4 w-4" />
                   <span className="hidden lg:inline">Dashboard</span>
-                </Button>
+                </button>
               </Link>
 
               {/* Avatar do usuário com dropdown */}
@@ -410,49 +441,43 @@ export function Header() {
             </div>
           ) : (
             // Usuário não logado
-            <div className="hidden sm:flex items-center space-x-2">
+            <div className="hidden sm:flex items-center space-x-3">
               <Link href="/login">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="btn-secondary hover-lift"
-                >
+                <button className="px-6 py-2.5 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium text-sm transition-all duration-300 hover:scale-105 hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-700">
                   Entrar
-                </Button>
+                </button>
               </Link>
               <Link href="/register">
-                <Button size="sm" className="btn-primary hover-lift">
+                <button className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium text-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg">
                   Cadastrar
-                </Button>
+                </button>
               </Link>
             </div>
           )}
 
           {/* MENU MOBILE */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="md:hidden h-9 w-9 btn-secondary hover-lift"
+          <button
+            className="md:hidden w-10 h-10 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800 hover:shadow-md transition-all duration-300 hover:scale-105 flex items-center justify-center"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (
-              <X className="h-4 w-4" />
+              <X className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             ) : (
-              <Menu className="h-4 w-4" />
+              <Menu className="h-5 w-5 text-gray-700 dark:text-gray-300" />
             )}
-          </Button>
+          </button>
         </div>
       </div>
 
       {/* MENU MOBILE EXPANDIDO - SEM ÍCONES */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-background/95 backdrop-blur animate-in slide-in-from-top duration-300">
+        <div className="md:hidden border-t border-gray-200 dark:border-gray-800 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl animate-in slide-in-from-top duration-500">
           <div className="container-custom py-6 space-y-3">
             {navigationItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="block px-4 py-3 text-base font-medium text-foreground hover:text-primary transition-all duration-200 rounded-lg hover:bg-accent/50 text-center hover-lift"
+                className="block px-6 py-4 text-base font-medium text-gray-700 dark:text-gray-300 transition-all duration-300 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 text-center hover:scale-105 hover:shadow-md"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 {item.label}
@@ -461,69 +486,68 @@ export function Header() {
 
             {/* Ações mobile para usuário não logado */}
             {!user && !isLoading && (
-              <div className="pt-4 border-t space-y-3">
+              <div className="pt-6 border-t border-gray-200 dark:border-gray-800 space-y-4">
                 <Link href="/login" className="block w-full">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-center btn-secondary"
+                  <button
+                    className="w-full px-6 py-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium text-base transition-all duration-300 hover:scale-105 hover:shadow-md"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Entrar
-                  </Button>
+                  </button>
                 </Link>
                 <Link href="/register" className="block w-full">
-                  <Button
-                    className="w-full justify-center btn-primary"
+                  <button
+                    className="w-full px-6 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium text-base transition-all duration-300 hover:scale-105 hover:shadow-2xl"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Cadastrar
-                  </Button>
+                  </button>
                 </Link>
               </div>
             )}
 
             {/* Ações mobile para usuário logado */}
             {user && !isLoading && (
-              <div className="pt-4 border-t space-y-3">
-                <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-accent/30">
+              <div className="pt-6 border-t border-gray-200 dark:border-gray-800 space-y-4">
+                <div className="flex items-center gap-4 px-6 py-4 rounded-2xl bg-gray-100 dark:bg-gray-800">
                   <div className="user-avatar">
                     <UserAvatar size="md" showName={false} />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium">Minha Conta</span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                      Minha Conta
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
                       Ver perfil
                     </span>
                   </div>
                 </div>
 
                 <Link href="/dashboard" className="block w-full">
-                  <Button
-                    variant="outline"
-                    className="w-full justify-center btn-secondary"
+                  <button
+                    className="w-full px-6 py-4 rounded-2xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium text-base transition-all duration-300 hover:scale-105 hover:shadow-md"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     Dashboard
-                  </Button>
+                  </button>
                 </Link>
-                <Button
-                  variant="outline"
-                  className="w-full justify-center text-destructive hover:text-destructive hover:bg-destructive/10"
+                <button
+                  className="w-full px-6 py-4 rounded-2xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 font-medium text-base transition-all duration-300 hover:scale-105 hover:shadow-md hover:bg-red-50 dark:hover:bg-red-900/20"
                   onClick={() => {
                     handleLogout();
                     setMobileMenuOpen(false);
                   }}
                 >
                   Sair
-                </Button>
+                </button>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* BORDER GRADIENT DECORATIVA */}
-      <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-purple-500/20"></div>
+      {/* BORDER GRADIENT DECORATIVA - CORRIGIDA */}
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-blue-500/20 to-transparent dark:via-purple-500/20"></div>
 
       {/* Sidebar do Carrinho */}
       <CartSidebar />
