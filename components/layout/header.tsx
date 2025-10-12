@@ -1,5 +1,3 @@
-// components/layout/header.tsx - APENAS EFEITO NEON NO HOVER
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -33,6 +31,7 @@ function ThemeToggleWithDropdown() {
   const [mounted, setMounted] = useState(false);
   const [theme, setTheme] = useState("system");
   const [isOpen, setIsOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -62,24 +61,71 @@ function ThemeToggleWithDropdown() {
 
   if (!mounted) {
     return (
-      <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 animate-pulse"></div>
+      <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 animate-pulse"></div>
     );
   }
 
   return (
     <div className="relative">
       <button
-        className="group relative w-9 h-9 rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 border border-gray-200 dark:border-gray-600 shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center"
+        className="group relative w-10 h-10 rounded-2xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 border border-gray-200/80 dark:border-gray-700/80 shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-110 flex items-center justify-center overflow-hidden"
         onClick={() => setIsOpen(!isOpen)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         aria-label="Selecionar tema"
       >
-        <div className="relative w-5 h-5">
-          <Sun className="w-4 h-4 text-amber-500 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 absolute inset-0 m-auto group-hover:text-amber-300 group-hover:drop-shadow-[0_0_12px_rgba(251,191,36,0.9)] group-hover:scale-110" />
-          <Moon className="w-4 h-4 text-blue-400 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 absolute inset-0 m-auto group-hover:text-blue-200 group-hover:drop-shadow-[0_0_12px_rgba(96,165,250,0.9)] group-hover:scale-110" />
+        {/* Background animado */}
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-400/10 via-blue-400/10 to-purple-400/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+        {/* Partículas flutuantes */}
+        <div className="absolute inset-0 overflow-hidden rounded-2xl">
+          <div
+            className={`absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)] transition-all duration-1000 ${
+              isHovered ? "scale-150" : "scale-100"
+            }`}
+          />
         </div>
 
-        {/* Apenas o efeito de glow externo neon - removido o risco branco */}
-        <div className="absolute -inset-1 rounded-xl bg-amber-400/40 dark:bg-blue-400/40 opacity-0 group-hover:opacity-100 blur-lg transition-all duration-300" />
+        {/* Ícone principal com rotação suave */}
+        <div className="relative w-6 h-6 transform transition-all duration-700 group-hover:rotate-180">
+          {/* Sol - mais detalhado */}
+          <div className="absolute inset-0 transition-all duration-500 dark:opacity-0 dark:scale-0 opacity-100 scale-100">
+            <div className="w-full h-full relative">
+              {/* Raios do sol */}
+              <div className="absolute inset-0 animate-pulse-slow">
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 w-0.5 h-1 bg-amber-400 rounded-full" />
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1 w-0.5 h-1 bg-amber-400 rounded-full" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-1 h-0.5 bg-amber-400 rounded-full" />
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1 w-1 h-0.5 bg-amber-400 rounded-full" />
+              </div>
+              {/* Centro do sol */}
+              <div className="w-4 h-4 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-lg shadow-amber-400/30" />
+            </div>
+          </div>
+
+          {/* Lua - mais detalhado */}
+          <div className="absolute inset-0 transition-all duration-500 dark:opacity-100 dark:scale-100 opacity-0 scale-0">
+            <div className="w-full h-full relative">
+              {/* Crateras da lua */}
+              <div className="absolute top-1 left-2 w-1 h-1 bg-blue-300/30 rounded-full" />
+              <div className="absolute bottom-2 right-1 w-0.5 h-0.5 bg-blue-300/20 rounded-full" />
+              {/* Lua */}
+              <div className="w-4 h-4 bg-gradient-to-br from-blue-300 via-blue-400 to-blue-500 rounded-full absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-lg shadow-blue-400/20" />
+              {/* Brilho suave */}
+              <div className="absolute inset-0 bg-blue-400/10 rounded-full blur-sm" />
+            </div>
+          </div>
+        </div>
+
+        {/* Efeito de glow neon dinâmico */}
+        <div
+          className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-amber-400/30 via-blue-400/30 to-purple-400/30 opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500 ${
+            isHovered ? "scale-110" : "scale-100"
+          }`}
+        />
+
+        {/* Borda sutil no hover */}
+        <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-amber-400/20 to-blue-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </button>
 
       {isOpen && (
@@ -89,28 +135,50 @@ function ThemeToggleWithDropdown() {
             onClick={() => setIsOpen(false)}
           />
 
-          <div className="absolute right-0 top-12 z-50 w-48 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-3 shadow-2xl animate-in fade-in-0 zoom-in-95">
-            <div className="space-y-2">
+          <div className="absolute right-0 top-14 z-50 w-52 rounded-2xl border border-gray-200/80 dark:border-gray-700/80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl p-2 shadow-2xl animate-in fade-in-0 zoom-in-95">
+            {/* Header do dropdown */}
+            <div className="px-3 py-2 border-b border-gray-100 dark:border-gray-800 mb-1">
+              <p className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <div className="w-2 h-2 bg-gradient-to-r from-amber-400 to-blue-500 rounded-full" />
+                Tema da Interface
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Escolha sua preferência
+              </p>
+            </div>
+
+            <div className="space-y-1">
               <button
                 onClick={() => handleThemeChange("light")}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all duration-300 group ${
                   theme === "light"
-                    ? "bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 dark:from-amber-900/20 dark:text-amber-300 border border-amber-200 dark:border-amber-800 shadow-sm"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105"
+                    ? "bg-gradient-to-r from-amber-50/80 to-orange-50/80 text-amber-700 dark:text-amber-300 border border-amber-200/50 dark:border-amber-800/50 shadow-lg backdrop-blur-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 hover:shadow-md backdrop-blur-sm"
                 }`}
               >
                 <div
-                  className={`p-2 rounded-lg ${
+                  className={`p-2 rounded-xl transition-all duration-300 ${
                     theme === "light"
-                      ? "bg-amber-100 dark:bg-amber-900/30"
-                      : "bg-gray-100 dark:bg-gray-800"
+                      ? "bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg shadow-amber-400/30"
+                      : "bg-gray-100 dark:bg-gray-800 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30"
                   }`}
                 >
-                  <Sun className="h-4 w-4" />
+                  <Sun
+                    className={`h-4 w-4 transition-all duration-300 ${
+                      theme === "light"
+                        ? "text-white scale-110"
+                        : "text-amber-600 dark:text-amber-400"
+                    }`}
+                  />
                 </div>
-                <span className="font-medium">Claro</span>
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">Claro</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Modo diurno
+                  </span>
+                </div>
                 {theme === "light" && (
-                  <div className="ml-auto w-2 h-2 rounded-full bg-amber-500" />
+                  <div className="ml-auto w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 animate-pulse" />
                 )}
               </button>
 
@@ -118,22 +186,33 @@ function ThemeToggleWithDropdown() {
                 onClick={() => handleThemeChange("dark")}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all duration-300 group ${
                   theme === "dark"
-                    ? "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 dark:from-blue-900/20 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-sm"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105"
+                    ? "bg-gradient-to-r from-blue-50/80 to-indigo-50/80 text-blue-700 dark:text-blue-300 border border-blue-200/50 dark:border-blue-800/50 shadow-lg backdrop-blur-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 hover:shadow-md backdrop-blur-sm"
                 }`}
               >
                 <div
-                  className={`p-2 rounded-lg ${
+                  className={`p-2 rounded-xl transition-all duration-300 ${
                     theme === "dark"
-                      ? "bg-blue-100 dark:bg-blue-900/30"
-                      : "bg-gray-100 dark:bg-gray-800"
+                      ? "bg-gradient-to-br from-blue-400 to-indigo-600 shadow-lg shadow-blue-400/30"
+                      : "bg-gray-100 dark:bg-gray-800 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30"
                   }`}
                 >
-                  <Moon className="h-4 w-4" />
+                  <Moon
+                    className={`h-4 w-4 transition-all duration-300 ${
+                      theme === "dark"
+                        ? "text-white scale-110"
+                        : "text-blue-600 dark:text-blue-400"
+                    }`}
+                  />
                 </div>
-                <span className="font-medium">Escuro</span>
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">Escuro</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Modo noturno
+                  </span>
+                </div>
                 {theme === "dark" && (
-                  <div className="ml-auto w-2 h-2 rounded-full bg-blue-500" />
+                  <div className="ml-auto w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 animate-pulse" />
                 )}
               </button>
 
@@ -141,24 +220,42 @@ function ThemeToggleWithDropdown() {
                 onClick={() => handleThemeChange("system")}
                 className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm transition-all duration-300 group ${
                   theme === "system"
-                    ? "bg-gradient-to-r from-gray-50 to-slate-50 text-gray-700 dark:from-gray-800/20 dark:text-gray-300 border border-gray-200 dark:border-gray-700 shadow-sm"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:scale-105"
+                    ? "bg-gradient-to-r from-gray-50/80 to-slate-50/80 text-gray-700 dark:text-gray-300 border border-gray-200/50 dark:border-gray-700/50 shadow-lg backdrop-blur-sm"
+                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 hover:shadow-md backdrop-blur-sm"
                 }`}
               >
                 <div
-                  className={`p-2 rounded-lg ${
+                  className={`p-2 rounded-xl transition-all duration-300 ${
                     theme === "system"
-                      ? "bg-gray-100 dark:bg-gray-800"
-                      : "bg-gray-100 dark:bg-gray-800"
+                      ? "bg-gradient-to-br from-gray-400 to-slate-600 shadow-lg shadow-gray-400/30"
+                      : "bg-gray-100 dark:bg-gray-800 group-hover:bg-gray-200 dark:group-hover:bg-gray-700"
                   }`}
                 >
-                  <Monitor className="h-4 w-4" />
+                  <Monitor
+                    className={`h-4 w-4 transition-all duration-300 ${
+                      theme === "system"
+                        ? "text-white scale-110"
+                        : "text-gray-600 dark:text-gray-400"
+                    }`}
+                  />
                 </div>
-                <span className="font-medium">Sistema</span>
+                <div className="flex flex-col items-start">
+                  <span className="font-medium">Sistema</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    Automático
+                  </span>
+                </div>
                 {theme === "system" && (
-                  <div className="ml-auto w-2 h-2 rounded-full bg-gray-500" />
+                  <div className="ml-auto w-2 h-2 rounded-full bg-gradient-to-r from-gray-400 to-slate-500 animate-pulse" />
                 )}
               </button>
+            </div>
+
+            {/* Footer do dropdown */}
+            <div className="px-3 py-2 border-t border-gray-100 dark:border-gray-800 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                Atual: <span className="font-medium capitalize">{theme}</span>
+              </p>
             </div>
           </div>
         </>
