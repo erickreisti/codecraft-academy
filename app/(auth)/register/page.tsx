@@ -1,5 +1,14 @@
 // app/register/page.tsx - DESIGN PREMIUM
-"use client";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Cadastro - CodeCraft Academy",
+  description:
+    "Crie sua conta na CodeCraft Academy e comece sua jornada em programação",
+};
+
+// O resto do código permanece exatamente igual...
+("use client");
 
 import { useState } from "react";
 import Link from "next/link";
