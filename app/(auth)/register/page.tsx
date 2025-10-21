@@ -1,10 +1,4 @@
-import { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Cadastro - CodeCraft Academy",
-  description:
-    "Crie sua conta na CodeCraft Academy e comece sua jornada em programação",
-};
+"use client";
 
 import { useState } from "react";
 import Link from "next/link";
