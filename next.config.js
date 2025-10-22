@@ -23,7 +23,13 @@ const nextConfig = {
     minimumCacheTTL: 60,
   },
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
+  },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: false,
   },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
