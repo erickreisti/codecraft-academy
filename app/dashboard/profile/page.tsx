@@ -1,6 +1,8 @@
 // app/dashboard/profile/page.tsx - VERSÃO PREMIUM COM MELHORIAS
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";

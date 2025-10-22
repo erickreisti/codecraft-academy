@@ -1,6 +1,8 @@
 // app/admin/page.tsx - VERSÃO PROFISSIONAL E FUNCIONAL
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";

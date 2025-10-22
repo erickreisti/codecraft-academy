@@ -1,18 +1,6 @@
-// app/checkout/page.tsx - VERSÃO COMPLETA E FUNCIONAL
-
-/**
- * PÁGINA DE CHECKOUT - Finalização de Compra
- *
- * FUNCIONALIDADES:
- * - ✅ Sticky do resumo funcionando
- * - ✅ Cupons de desconto
- * - ✅ Validação de matrículas existentes
- * - ✅ Processamento completo do pedido
- * - ✅ Rollback em caso de erro
- * - ✅ Interface responsiva e moderna
- */
-
 "use client";
+
+export const dynamic = "force-dynamic";
 
 import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";

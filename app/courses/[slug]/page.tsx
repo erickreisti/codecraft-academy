@@ -1,9 +1,10 @@
 // app/courses/[slug]/page.tsx - VERSÃO MELHORADA
+export const dynamic = "force-dynamic";
+
 import { createAdminClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import { CourseImage } from "@/components/ui/course-image";
 import {

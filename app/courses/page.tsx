@@ -1,14 +1,8 @@
 // app/courses/page.tsx - COM IMAGEM IGUAL AO BLOG
+export const dynamic = "force-dynamic";
+
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { AddToCartButton } from "@/components/cart/add-to-cart-button";
 import Link from "next/link";
 import { CourseImage } from "@/components/ui/course-image";
