@@ -1,10 +1,9 @@
-// app/checkout/success/page.tsx - VERSÃO COMPLETA CORRIGIDA
-
+// app/checkout/success/page.tsx - VERSÃO CORRIGIDA COM SUSPENSE
 "use client";
 
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +33,7 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import Image from "next/image";
+import { Spinner } from "@/components/ui/spinner";
 
 interface Course {
   id: string;
@@ -80,7 +80,8 @@ const getLevelColor = (level: string) => {
   }
 };
 
-export default function CheckoutSuccessPage() {
+// Componente que usa useSearchParams
+function CheckoutSuccessContent() {
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>("");
@@ -258,7 +259,10 @@ export default function CheckoutSuccessPage() {
               </p>
             </div>
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <Spinner
+                size="lg"
+                className="border-blue-600 border-t-transparent"
+              />
             </div>
           </div>
         </div>
@@ -681,5 +685,44 @@ export default function CheckoutSuccessPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+// Loading component
+function CheckoutSuccessLoading() {
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <div className="container-custom py-20 text-center">
+        <div className="max-w-md mx-auto space-y-6">
+          <div className="w-20 h-20 mx-auto bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+            <Sparkles className="h-10 w-10 text-white animate-pulse" />
+          </div>
+          <div className="space-y-3">
+            <h2 className="text-2xl font-bold text-foreground">
+              Carregando detalhes do pedido...
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Preparando sua experiência de sucesso
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <Spinner
+              size="lg"
+              className="border-blue-600 border-t-transparent"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Componente principal com Suspense
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense fallback={<CheckoutSuccessLoading />}>
+      <CheckoutSuccessContent />
+    </Suspense>
   );
 }
